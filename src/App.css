@@ -1,4 +1,4 @@
-.App {
+/* .App {
   text-align: center;
 }
 
@@ -35,4 +35,30 @@
   to {
     transform: rotate(360deg);
   }
+} */
+.app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.hex-grid {
+  display: flex;
+  flex-wrap: wrap;
+  width: 13.5em; /* Adjust the width based on your needs */
+}
+
+.circle {
+  width: 1em;
+  height: 1em;
+  background-color: #3498db;
+  border-radius: 50%;
+  margin: 0.25em;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.circle.hidden {
+  background-color: #2ecc701e;
 }
