@@ -1,0 +1,118 @@
+// Board.tsx
+import React, { useEffect, useState } from 'react';
+
+interface BoardProps { }
+interface Circle {
+    id: number;
+    isVisible: boolean;
+}
+
+const Board: React.FC<BoardProps> = () => {
+    // ------------------------ BOARD DEFINITION CONSTANTS --------------------
+    const rowLengths = [4, 5, 6, 7, 6, 5, 4];
+    const ballCounts = [6, 8, 10];
+    const ballColors = ["white", "lightslategrey", "darkslategrey"]
+    const ringColor = "black";
+    const ringRadius = 50;
+    const ringThickness = ringRadius / 2.0;
+    const ballRadius = 0.8 * ringRadius;
+    const circleRadius = ringRadius - ringThickness / 2;
+    const [circles2, setCircles2] = useState<JSX.Element[]>([]);
+
+    const handleClick = (id: number) => {
+        console.log(`circle ${id} was clicked`);
+    };
+
+
+    const svgInit = () => {
+        const xInc = 2.0 * ringRadius;
+        const yInc = xInc * Math.sin(Math.PI / 3.0);
+        const numCircles = 99;
+        var xInit = 50;
+        var x = xInit;
+        var y = x;
+        var numRows = rowLengths.length;
+        var maxRowLength = Math.max(...rowLengths);
+        var numBoardPositions = rowLengths.reduce((sum, x) => sum + x);
+        const circlesBuilder: JSX.Element[] = [];
+        // Place circles on board
+        var i = 0;
+        for (var row = 0; row < numRows; row++) {
+            y = 50 + yInc * row;
+            xInit = 50 + xInc * Math.abs(maxRowLength - rowLengths[row]) / 2; // integer division used to offset odd rows
+            for (var position = 0; position < rowLengths[row]; position++) {
+                x = xInit + position * xInc;
+                circlesBuilder[i] =
+                    <circle
+                        id={`c${i + 1}`}
+                        cx={x}
+                        cy={y}
+                        r={circleRadius}
+                        stroke={ringColor}
+                        stroke-opacity={1}
+                        strokeWidth={ringThickness}
+                        fill-opacity={0}
+                    />
+                i++;
+            }
+        }
+        y = (numRows + 2) * yInc;
+        for (var b = 0; b < ballCounts.length; b++) {
+            x = 50;
+            for (var j = 0; j < ballCounts[b]; j++) {
+                circlesBuilder[i] =
+                    <circle
+                        id={`c${i + 1}`}
+                        cx={x} cy={y}
+                        fill={ballColors[b]}
+                        strokeOpacity={0}
+                    />
+                x += 2 * ballRadius * 1.1;
+                i++;
+            }
+            y += yInc;
+        }
+        // Hide other circles
+        for (; i < numCircles; i++) {
+            circlesBuilder[i] =
+                <circle
+                    id={`c${i + 1}`}
+                    strokeOpacity={0}
+                    fillOpacity={0}
+                />
+        }
+        setCircles2(circlesBuilder);
+    };
+
+
+    // Board: knows which SVG elements correspond to each board position and spare ball position
+    //        collection of balls
+    //          collection of rings
+    //          board positions
+    //          adjacencies
+    // -------------------------------- TESTS ------------------------------------
+    // -------------------------- MAIN --------------------------------------
+    useEffect(svgInit, []);
+
+    const handleMove = (/* handle user moves */) => {
+        // Update game state
+    };
+
+    return (
+        <table>
+            <tr>
+                <td>
+                    <svg id="board" width="700" height="700">
+                        {circles2}
+                        Sorry, your browser does not support inline SVG.
+                    </svg>
+                </td>
+                <td>
+                    <div id="output"></div>
+                </td>
+            </tr>
+        </table>
+    );
+};
+
+export default Board;
