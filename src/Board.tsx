@@ -1,6 +1,7 @@
 // Board.tsx
 import React, { useEffect, useState } from 'react';
 import Ring from './Ring';
+import Ball from './Ball';
 
 interface BoardProps { }
 interface Circle {
@@ -12,7 +13,7 @@ const Board: React.FC<BoardProps> = () => {
     // ------------------------ BOARD DEFINITION CONSTANTS --------------------
     const rowLengths = [4, 5, 6, 7, 6, 5, 4];
     const ballCounts = [6, 8, 10];
-    const ballColors = ["white", "lightslategrey", "darkslategrey"]
+    const ballColors = ["white", "gray", "gunmetalgray"]
     const ringColor = "black";
     const ringRadius = 50;
     const ringThickness = ringRadius / 2.0;
@@ -105,7 +106,12 @@ const Board: React.FC<BoardProps> = () => {
                 <td>
                     <svg id="board" width="700" height="700">
                         {circles2}
-                        <Ring id="TEST-css" centerX={50} centerY={50} isVisible={true} />
+                        <Ring id="TEST-Ring" centerX={50} centerY={50} isVisible={true} />
+                        <Ball id="TEST-Ball" centerX={50} centerY={50} isVisible={true} color={ballColors[0]}/>
+                        <Ring id="TEST-Ring" centerX={50} centerY={150} isVisible={true} />
+                        <Ball id="TEST-Ball" centerX={50} centerY={150} isVisible={true} color={ballColors[1]} />
+                        <Ring id="TEST-rinv" centerX={50} centerY={250} isVisible={true} />
+                        <Ball id="TEST-binv" centerX={50} centerY={250} isVisible={true} color={ballColors[2]} />
                         Sorry, your browser does not support inline SVG.
                     </svg>
                 </td>

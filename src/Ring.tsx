@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 interface RingProps {
     id: string | number;
@@ -14,15 +14,15 @@ const Ring: React.FC<RingProps> = (props: RingProps) => {
     const circleRadius = desiredRingRadius - ringThickness / 2;
     return (
     <circle
-        className={`circle ${props.isVisible ? 'visible' : 'hidden'}`}
+        className={`ring ${props.isVisible ? 'visible' : 'hidden'}`}
         id={props.id.toString()}
         cx={props.centerX}
         cy={props.centerY}
         r={circleRadius}
-        // stroke={ringColor}
-        // stroke-opacity={1}
-        // strokeWidth={ringThickness}
-        // fill-opacity={0}
+        stroke={ringColor}
+        stroke-opacity={props.isVisible ? 1 : 0}
+        strokeWidth={ringThickness}
+        fill-opacity={0}
 />)
 };
 
