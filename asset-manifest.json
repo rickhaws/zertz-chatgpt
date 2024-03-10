@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/zertz-chatgpt/static/css/main.d5a1c3ed.css",
-    "main.js": "/zertz-chatgpt/static/js/main.37b5b610.js",
+    "main.css": "/zertz-chatgpt/static/css/main.5d387997.css",
+    "main.js": "/zertz-chatgpt/static/js/main.0d690a9e.js",
     "static/js/453.00992006.chunk.js": "/zertz-chatgpt/static/js/453.00992006.chunk.js",
     "index.html": "/zertz-chatgpt/index.html",
-    "main.d5a1c3ed.css.map": "/zertz-chatgpt/static/css/main.d5a1c3ed.css.map",
-    "main.37b5b610.js.map": "/zertz-chatgpt/static/js/main.37b5b610.js.map",
+    "main.5d387997.css.map": "/zertz-chatgpt/static/css/main.5d387997.css.map",
+    "main.0d690a9e.js.map": "/zertz-chatgpt/static/js/main.0d690a9e.js.map",
     "453.00992006.chunk.js.map": "/zertz-chatgpt/static/js/453.00992006.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.d5a1c3ed.css",
-    "static/js/main.37b5b610.js"
+    "static/css/main.5d387997.css",
+    "static/js/main.0d690a9e.js"
   ]
 }
