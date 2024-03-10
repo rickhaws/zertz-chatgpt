@@ -1,5 +1,6 @@
 // Board.tsx
 import React, { useEffect, useState } from 'react';
+import Ring from './Ring';
 
 interface BoardProps { }
 interface Circle {
@@ -104,6 +105,7 @@ const Board: React.FC<BoardProps> = () => {
                 <td>
                     <svg id="board" width="700" height="700">
                         {circles2}
+                        <Ring id="TEST-css" centerX={50} centerY={50} isVisible={true} />
                         Sorry, your browser does not support inline SVG.
                     </svg>
                 </td>
