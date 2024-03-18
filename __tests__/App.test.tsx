@@ -1,6 +1,6 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import App from './App';
+import App from '../../src/App';
 import userEvent from '@testing-library/user-event';
 
 test('renders board', () => {
