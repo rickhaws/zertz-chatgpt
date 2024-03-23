@@ -86,3 +86,13 @@ export const setState = (row: number, col: number, newState: SpaceState) => {
         return false;
     }
 }
+
+export const CanJump = () => {
+    let jumps: boolean[][] = Array(BOARD_SIZE).map(row => Array(BOARD_SIZE).map(col => false));
+    for (let i = 0; i < jumps.length; i++) {
+        for (let j = 0; j < jumps[i].length; j++) {
+
+        }
+    }
+    return jumps;
+}
