@@ -1,5 +1,4 @@
-//bool CanRemove(std::vector<std::vector<SpaceState>>& board, int row, int cell)
-type SpaceState = 'Removed' | 'Open' | 'White' | 'Gray' | 'Black' | 'Invalid';
+export type SpaceState = 'Removed' | 'Open' | 'White' | 'Gray' | 'Black' | 'Invalid';
 
 export const canRemove = (board: SpaceState[][], row: number, cell: number) =>
 {
@@ -29,7 +28,7 @@ export const canRemove = (board: SpaceState[][], row: number, cell: number) =>
     return false;
 }
 
-const GetNeighbors = (board: SpaceState[][], row: number, cell: number): SpaceState[] => {
+export const GetNeighbors = (board: SpaceState[][], row: number, cell: number): SpaceState[] => {
     const neighbors: SpaceState[] = [
         board[row - 1][cell],
         board[row - 1][cell + 1],
