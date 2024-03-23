@@ -1,0 +1,76 @@
+import * as Game from './Game';
+
+    //	\0\1\2\3\4\5\6\
+    // 0 \ \ \ \O\O\O\O\
+	// 1  \ \ \O\O\O\O\O\
+	// 2   \ \O\O\O\O\O\O\
+	// 3    \O\O\O\O\O\O\O\
+	// 4     \O\O\O\O\O\O\ \
+	// 5      \O\O\O\O\O\ \ \
+	// 6       \O\O\O\O\ \ \ \
+
+describe('Game state tests', () => {
+    it('Tests initialize', () => {
+        for (let i = 0; i < Game.BOARD_SIZE; i++) {
+            for (let j = 0; j < Game.BOARD_SIZE; j++) {
+                expect(Game.getState(i, j)).toEqual('Open');
+            }
+        }
+        Game.initBoard();
+        expect(Game.getState(0, 0)).toBe('Removed');
+        expect(Game.getState(0, 1)).toBe('Removed');
+        expect(Game.getState(0, 2)).toBe('Removed');
+        expect(Game.getState(0, 3)).toBe('Open');
+        expect(Game.getState(0, 4)).toBe('Open');
+        expect(Game.getState(0, 5)).toBe('Open');
+        expect(Game.getState(0, 6)).toBe('Open');
+
+        expect(Game.getState(1, 0)).toBe('Removed');
+        expect(Game.getState(1, 1)).toBe('Removed');
+        expect(Game.getState(1, 2)).toBe('Open');
+        expect(Game.getState(1, 3)).toBe('Open');
+        expect(Game.getState(1, 4)).toBe('Open');
+        expect(Game.getState(1, 5)).toBe('Open');
+        expect(Game.getState(1, 6)).toBe('Open');
+
+        expect(Game.getState(2, 0)).toBe('Removed');
+        expect(Game.getState(2, 1)).toBe('Open');
+        expect(Game.getState(2, 2)).toBe('Open');
+        expect(Game.getState(2, 3)).toBe('Open');
+        expect(Game.getState(2, 4)).toBe('Open');
+        expect(Game.getState(2, 5)).toBe('Open');
+        expect(Game.getState(2, 6)).toBe('Open');
+
+        expect(Game.getState(3, 0)).toBe('Open');
+        expect(Game.getState(3, 1)).toBe('Open');
+        expect(Game.getState(3, 2)).toBe('Open');
+        expect(Game.getState(3, 3)).toBe('Open');
+        expect(Game.getState(3, 4)).toBe('Open');
+        expect(Game.getState(3, 5)).toBe('Open');
+        expect(Game.getState(3, 6)).toBe('Open');
+
+        expect(Game.getState(4, 0)).toBe('Open');
+        expect(Game.getState(4, 1)).toBe('Open');
+        expect(Game.getState(4, 2)).toBe('Open');
+        expect(Game.getState(4, 3)).toBe('Open');
+        expect(Game.getState(4, 4)).toBe('Open');
+        expect(Game.getState(4, 5)).toBe('Open');
+        expect(Game.getState(4, 6)).toBe('Removed');
+
+        expect(Game.getState(5, 0)).toBe('Open');
+        expect(Game.getState(5, 1)).toBe('Open');
+        expect(Game.getState(5, 2)).toBe('Open');
+        expect(Game.getState(5, 3)).toBe('Open');
+        expect(Game.getState(5, 4)).toBe('Open');
+        expect(Game.getState(5, 5)).toBe('Removed');
+        expect(Game.getState(5, 6)).toBe('Removed');
+
+        expect(Game.getState(6, 0)).toBe('Open');
+        expect(Game.getState(6, 1)).toBe('Open');
+        expect(Game.getState(6, 2)).toBe('Open');
+        expect(Game.getState(6, 3)).toBe('Open');
+        expect(Game.getState(6, 4)).toBe('Removed');
+        expect(Game.getState(6, 5)).toBe('Removed');
+        expect(Game.getState(6, 6)).toBe('Removed');
+    });
+});

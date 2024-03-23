@@ -7,16 +7,17 @@ const board: SpaceState[][] = Array(BOARD_SIZE).map(row => Array(BOARD_SIZE).map
 export const initBoard = () => {
     for (let i=0; i < 3; i++) {
         for (let j=0; j < 3-i; j++) {
-            board[i][j] = 'Removed';
-            board[BOARD_SIZE-i-1][BOARD_SIZE-j-1];
+                        board[i][j] = 'Removed';
+                        board[BOARD_SIZE-i-1][BOARD_SIZE-j-1];
         }
     }
 }
 
+export const getState = (row: number, col: number) => board[row][col];
 
 export const canRemove = (row: number, col: number) =>
 {
-    if (board[row][col] != 'Open') return false;
+    if (board[row][col] !== 'Open') return false;
 
     //	\0\1\2\3\4\5\6\
     // 0 \ \ \ \O\O\O\O\
@@ -35,7 +36,7 @@ export const canRemove = (row: number, col: number) =>
     let previous: SpaceState = 'Open';
     for (let current of neighbors)
     {
-        if (previous == 'Removed' && current == 'Removed') return true;
+        if (previous === 'Removed' && current === 'Removed') return true;
         previous = current;
     }
 
@@ -55,7 +56,7 @@ export const getNeighbors = (row: number, col: number): SpaceState[] => {
     return neighbors;
 }
 
-const isOccupied = (row: number, col: number) => {
+export const isOccupied = (row: number, col: number) => {
     return (board[row][col] === 'White' ||
             board[row][col] === 'Gray' ||
             board[row][col] === 'Black');
