@@ -1,7 +1,8 @@
 // Board.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Ring from './Ring';
 import Ball from './Ball';
+import { getNeighbors, canRemove, SpaceState } from './Game';
 
 interface BoardProps { }
 interface Circle {
@@ -94,7 +95,20 @@ const Board: React.FC<BoardProps> = () => {
     //          adjacencies
     // -------------------------------- TESTS ------------------------------------
     // -------------------------- MAIN --------------------------------------
-    useEffect(svgInit, []);
+    const [indexA, setA] = useState(0);
+    const [indexB, setB] = useState(1);
+    const [indexC, setC] = useState(2);
+    const [seconds, setSeconds] = useState(0);
+    useEffect(() => {
+        svgInit();
+        setInterval(() => setSeconds(i => i + 1), 1000);
+    }, []);
+    // temp - change colors
+    useEffect(() => {
+        setA(i => i + 1);
+        setB(i => i + 1);
+        setC(i => i + 1);
+    }, [seconds]);
 
     const handleMove = (/* handle user moves */) => {
         // Update game state
@@ -107,11 +121,11 @@ const Board: React.FC<BoardProps> = () => {
                     <svg id="board" width="700" height="700">
                         {circles}
                         <Ring id="TEST-Ring" centerX={50} centerY={50} isVisible={true} />
-                        <Ball id="TEST-Ball" centerX={50} centerY={50} isVisible={true} color={ballColors[0]}/>
+                        <Ball id="TEST-Ball" centerX={50} centerY={50} isVisible={true} color={ballColors[indexA % 3]}/>
                         <Ring id="TEST-Ring" centerX={50} centerY={150} isVisible={true} />
-                        <Ball id="TEST-Ball" centerX={50} centerY={150} isVisible={true} color={ballColors[1]} />
+                        <Ball id="TEST-Ball" centerX={50} centerY={150} isVisible={true} color={ballColors[indexB % 3]} />
                         <Ring id="TEST-rinv" centerX={50} centerY={250} isVisible={true} />
-                        <Ball id="TEST-binv" centerX={50} centerY={250} isVisible={true} color={ballColors[2]} />
+                        <Ball id="TEST-binv" centerX={50} centerY={250} isVisible={true} color={ballColors[indexC % 3]} />
                         Sorry, your browser does not support inline SVG.
                     </svg>
                 </td>
