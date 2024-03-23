@@ -108,11 +108,18 @@ export const getJumps = () => {
             else if (isOccupied(i, j-1) && !isOccupied(i, j-2)) { // check for straight left jump
                 jumps[i][j] = true;
             }
-            else if (isOccupied(i+1, j) && !isOccupied(i+2, j)) { // check for up left diagonall jump
+            else if (isOccupied(i+1, j) && !isOccupied(i+2, j)) { // check for up left diagonal jump
                 jumps[i][j] = true;
             }
-            else if (isOccupied(i+1, j+1) && !isOccupied())
-            
+            else if (isOccupied(i+1, j+1) && !isOccupied(i+2, j+2)) { // check for up right diagonal jump
+                jumps[i][j] = true;
+            }
+            else if(isOccupied(i-1, j) && !isOccupied(i-2, j)) { // check for down right diagonal jump
+                jumps[i][j] = true;
+            }
+            else if (isOccupied(i-1, j-1) && ! isOccupied(i-2, j-2)) { // check for down left diagonal jump
+                jumps[i][j] = true;
+            }
         }
     }
     return jumps;
