@@ -8,7 +8,7 @@ export const initBoard = () => {
     for (let i=0; i < 3; i++) {
         for (let j=0; j < 3-i; j++) {
                         board[i][j] = 'Removed';
-                        board[BOARD_SIZE-i-1][BOARD_SIZE-j-1];
+                        board[BOARD_SIZE-i-1][BOARD_SIZE-j-1] = 'Removed';
         }
     }
 }
