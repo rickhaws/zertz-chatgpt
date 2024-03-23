@@ -2,7 +2,7 @@ export type SpaceState = 'Removed' | 'Open' | 'White' | 'Gray' | 'Black';
 
 export const BOARD_SIZE = 7;
 
-const board: SpaceState[][] = Array(BOARD_SIZE).map(row => Array(BOARD_SIZE).map(col => 'Open'));
+const board: SpaceState[][] = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill('Open'));
 
 export const initBoard = () => {
     for (let i=0; i < 3; i++) {
@@ -29,7 +29,7 @@ export const canRemove = (row: number, col: number) =>
 	// 6       \O\O\O\O\ \ \ \
 
     // List neighbor cells in circular fashion, repeating first at the end
-    const neighbors: SpaceState[] = getNeighbors(row, col);
+    const neighbors = getNeighbors(row, col);
 
     // If any two neighbors in a row are Removed,
     // then this space can be removed
