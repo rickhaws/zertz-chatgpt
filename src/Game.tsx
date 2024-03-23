@@ -93,7 +93,7 @@ export const getJumps = () => {
     // then return a boolean mask of the board where stones with jumps available are
     // indicated as true and all else are shown as false.
 
-    let jumps: boolean[][] = Array(BOARD_SIZE).map(row => Array(BOARD_SIZE).map(col => false));
+    let jumps: boolean[][] = Array(BOARD_SIZE).fill(0).map(row => Array(BOARD_SIZE).map(col => false));
     
     for (let i = 0; i < jumps.length; i++) {
         for (let j = 0; j < jumps[i].length; j++) {
