@@ -88,9 +88,30 @@ export const setState = (row: number, col: number, newState: SpaceState) => {
 }
 
 export const getJumps = () => {
+    // For each occupied ring, calculate whether the stone there can make any jumps,
+    // then return a boolean mask of the board where stones with jumps available are
+    // indicated as true and all else are shown as false.
+
     let jumps: boolean[][] = Array(BOARD_SIZE).map(row => Array(BOARD_SIZE).map(col => false));
+
     for (let i = 0; i < jumps.length; i++) {
         for (let j = 0; j < jumps[i].length; j++) {
+
+            if (!isOccupied(i,j)) { // Ignore unoccupied rings
+                continue;
+            } 
+
+            // only one condition need be met for the ring to have a jump possible
+            else if (isOccupied(i, j+1) && !isOccupied(i, j+2)) { // check for straight right jump
+                jumps[i][j] = true;
+            }
+            else if (isOccupied(i, j-1) && !isOccupied(i, j-2)) { // check for straight left jump
+                jumps[i][j] = true;
+            }
+            else if (isOccupied(i+1, j) && !isOccupied(i+2, j)) { // check for up left diagonall jump
+                jumps[i][j] = true;
+            }
+            else if (isOccupied(i+1, j+1) && !isOccupied())
             
         }
     }
