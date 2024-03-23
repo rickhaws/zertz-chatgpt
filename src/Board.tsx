@@ -19,7 +19,7 @@ const Board: React.FC<BoardProps> = () => {
     const ringThickness = ringRadius / 2.0;
     const ballRadius = 0.8 * ringRadius;
     const circleRadius = ringRadius - ringThickness / 2;
-    const [circles2, setCircles2] = useState<JSX.Element[]>([]);
+    const [circles, setCircles] = useState<JSX.Element[]>([]);
 
     const handleClick = (id: number) => {
         console.log(`circle ${id} was clicked`);
@@ -83,7 +83,7 @@ const Board: React.FC<BoardProps> = () => {
                     fillOpacity={0}
                 />
         }
-        setCircles2(circlesBuilder);
+        setCircles(circlesBuilder);
     };
 
 
@@ -118,7 +118,7 @@ const Board: React.FC<BoardProps> = () => {
             <tr>
                 <td>
                     <svg id="board" width="700" height="700">
-                        {circles2}
+                        {circles}
                         <Ring id="TEST-Ring" centerX={50} centerY={50} isVisible={true} />
                         <Ball id="TEST-Ball" centerX={50} centerY={50} isVisible={true} color={ballColors[indexA % 3]}/>
                         <Ring id="TEST-Ring" centerX={50} centerY={150} isVisible={true} />
