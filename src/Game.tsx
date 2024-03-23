@@ -22,7 +22,7 @@ export const canRemove = (row: number, col: number) =>
 
     // If any two neighbors in a row are Removed,
     // then this space can be removed
-    let previous: SpaceState = 'Invalid';
+    let previous: SpaceState = 'Open';
     for (let current of neighbors)
     {
         if (previous == 'Removed' && current == 'Removed') return true;
@@ -45,16 +45,34 @@ export const GetNeighbors = (row: number, col: number): SpaceState[] => {
     return neighbors;
 }
 
-export const SetState = (row: number, col: number, state: SpaceState) => {
-    let wasSuccessful = false;
-    switch (state) {
+const isOccupied = (row: number, col: number) => {
+    return (board[row][col] === 'White' ||
+            board[row][col] === 'Gray' ||
+            board[row][col] === 'Black');
+}
+
+export const isChangeAllowed = (row: number, col: number, newState: SpaceState) => {
+    let allowed = false;
+    switch (newState) {
         case 'White':
         case 'Black':
         case 'Gray':
-            if (board[row][col] == 'Removed') {
-                board[row][col] = state;
-                wasSuccessful = true;
-            }
+            allowed = (board[row][col] === 'Open');
+            break;
+        case 'Open':
+            allowed = isOccupied(row, col);
+            break;
+        case 'Removed':
+            allowed = canRemove(row, col);
     }
-    return wasSuccessful;
+    return allowed;
+}
+
+export const setState = (row: number, col: number, newState: SpaceState) => {
+    if (isChangeAllowed(row, col, newState)) {
+        board[row][col] = newState;
+        return true;
+    } else {
+        return false;
+    }
 }
