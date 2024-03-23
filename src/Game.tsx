@@ -1,6 +1,9 @@
-bool CanRemove(std::vector<std::vector<SpaceState>>& board, int row, int cell)
+//bool CanRemove(std::vector<std::vector<SpaceState>>& board, int row, int cell)
+type SpaceState = 'Removed' | 'Open' | 'White' | 'Gray' | 'Black' | 'Invalid';
+
+export const canRemove = (board: SpaceState[][], row: number, cell: number) =>
 {
-    if (board[row][cell] != SpaceState::Open) return false;
+    if (board[row][cell] != 'Open') return false;
 
     //	\1\2\3\4\5\6\7\
     // 1 \ \ \ \O\O\O\O\
@@ -12,23 +15,22 @@ bool CanRemove(std::vector<std::vector<SpaceState>>& board, int row, int cell)
 	// 7       \O\O\O\O\ \ \ \
 
     // List neighbor cells in circular fashion, repeating first at the end
-    std::vector<SpaceState> neighbors = GetNeighbors(board, row, cell);
+    const neighbors: SpaceState[] = GetNeighbors(board, row, cell);
 
     // If any two neighbors in a row are Removed,
     // then this space can be removed
-    SpaceState previous = SpaceState::Invalid;
-    for (auto current = neighbors.begin(); current < neighbors.end(); current++)
+    let previous: SpaceState = 'Invalid';
+    for (let current of neighbors)
     {
-        if (previous == SpaceState::Removed && *current == SpaceState::Removed) return true;
-        previous = *current;
+        if (previous == 'Removed' && current == 'Removed') return true;
+        previous = current;
     }
 
     return false;
 }
 
-std::vector<SpaceState> GetNeighbors(std::vector<std::vector<SpaceState>>& board, int row, int cell)
-{
-    std::vector<SpaceState> neighbors = {
+const GetNeighbors = (board: SpaceState[][], row: number, cell: number): SpaceState[] => {
+    const neighbors: SpaceState[] = [
         board[row - 1][cell],
         board[row - 1][cell + 1],
         board[row][cell + 1],
@@ -36,6 +38,6 @@ std::vector<SpaceState> GetNeighbors(std::vector<std::vector<SpaceState>>& board
         board[row + 1][cell - 1],
         board[row][cell - 1],
         board[row - 1][cell]
-    };
+    ];
     return neighbors;
 }
