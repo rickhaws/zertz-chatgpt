@@ -23,17 +23,19 @@ export const initBoard = () => {
     for (let i = 0; i < BOARD_SIZE + 2; i++) {
         board[0][i] = 'Removed';
         board[i][0] = 'Removed';
+        board[BOARD_SIZE + 1][i] = 'Removed';
+        board[i][BOARD_SIZE + 1] = 'Removed';
     }
-    
-    for (let i = 1; i < 4; i++) {
-        for (let j = 1; j < 4-i; j++) {
+
+    for (let i = 1; i <= 3; i++) {
+        for (let j = 1; j <= 4 - i; j++) {
             board[i][j] = 'Removed';
             board[BOARD_SIZE-i+1][BOARD_SIZE-j+1] = 'Removed';
         }
     }
 }
 
-export const getState = (row: number, col: number) => board[row][col];
+export const getState = (row: number, col: number) => {console.log(`Getting (${row},${col}`); return board[row][col] };
 
 export const canRemove = (row: number, col: number) =>
 {
