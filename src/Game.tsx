@@ -35,14 +35,13 @@ export const initBoard = () => {
     }
 }
 
-export const getState = (row: number, col: number) => {console.log(`Getting (${row},${col}`); return board[row][col] };
+export const getState = (row: number, col: number) => board[row][col];
 
 export const canRemove = (row: number, col: number) =>
 {
     if (board[row][col] !== 'Open') return false;
 
 
-    // List neighbor cells in circular fashion, repeating first at the end
     const neighbors = getNeighbors(row, col);
 
     // If any two neighbors in a row are Removed,
@@ -57,7 +56,9 @@ export const canRemove = (row: number, col: number) =>
     return false;
 }
 
-export const getNeighbors = (row: number, col: number): SpaceState[] => {
+    // List neighbor cells in circular fashion, beginning at upper-left and 
+    // repeating first at the end.
+    export const getNeighbors = (row: number, col: number): SpaceState[] => {
     const neighbors: SpaceState[] = [
         board[row - 1][col],
         board[row - 1][col + 1],
