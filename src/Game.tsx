@@ -108,7 +108,7 @@ export const getJumps = () => {
     // then return a boolean mask of the board where stones with jumps available are
     // indicated as true and all else are shown as false.
 
-    let jumps: boolean[][] = Array(BOARD_SIZE + 2).fill(0).map(row => Array(BOARD_SIZE + 2).map(col => false));
+    let jumps: boolean[][] = Array(BOARD_SIZE + 2).fill(0).map(_ => Array(BOARD_SIZE + 2).fill(false));
     
     for (let i = 0; i < jumps.length; i++) {
         for (let j = 0; j < jumps[i].length; j++) {
@@ -118,22 +118,22 @@ export const getJumps = () => {
             } 
 
             // only one condition need be met for the ring to have a jump possible
-            else if (j+2 <= jumps[i].length && isOccupied(i, j+1) && board[i][j+2] === 'Open') { // check for straight right jump
+            else if (isOccupied(i, j+1) && board[i][j+2] === 'Open') { // check for straight right jump
                 jumps[i][j] = true;
             }
-            else if (j-2 >= 0 && isOccupied(i, j-1) && board[i][j-2] === 'Open') { // check for straight left jump
+            else if (isOccupied(i, j-1) && board[i][j-2] === 'Open') { // check for straight left jump
                 jumps[i][j] = true;
             }
-            else if (i-2 >= 0 && isOccupied(i-1, j) && board[i-2][j] === 'Open') { // check for up left diagonal jump
+            else if (isOccupied(i-1, j) && board[i-2][j] === 'Open') { // check for up left diagonal jump
                 jumps[i][j] = true;
             }
-            else if (i-2 >= 0 && j+2 <= jumps[i].length && isOccupied(i-1, j+1) && board[i-2][j+2] === 'Open') { // check for up right diagonal jump
+            else if (isOccupied(i-1, j+1) && board[i-2][j+2] === 'Open') { // check for up right diagonal jump
                 jumps[i][j] = true;
             }
-            else if(i+2 <= jumps.length && isOccupied(i+1, j) && board[i+2][j] === 'Open') { // check for down right diagonal jump
+            else if(isOccupied(i+1, j) && board[i+2][j] === 'Open') { // check for down right diagonal jump
                 jumps[i][j] = true;
             }
-            else if (i+2 <= jumps.length && j-2 >=0 &&isOccupied(i+1, j-1) && board[i+2][j-2] === 'Open') { // check for down left diagonal jump
+            else if (isOccupied(i+1, j-1) && board[i+2][j-2] === 'Open') { // check for down left diagonal jump
                 jumps[i][j] = true;
             }
         }
