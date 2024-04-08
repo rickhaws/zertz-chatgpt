@@ -46,12 +46,18 @@ export const canRemove = (row: number, col: number) =>
 
     // If any two neighbors in a row are Removed,
     // then this space can be removed
-    let previous: SpaceState = 'Open';
-    for (let current of neighbors)
-    {
-        if (previous === 'Removed' && current === 'Removed') return true;
-        previous = current;
+    for (let i of [0, 1, 2, 3, 4, 5]) {
+        if (neighbors[i % 6] === 'Removed'
+        && neighbors[i+1 % 6] === 'Removed') {
+            return true;
+        }
     }
+    // let previous: SpaceState = 'Open';
+    // for (let current of neighbors)
+    // {
+    //     if (previous === 'Removed' && current === 'Removed') return true;
+    //     previous = current;
+    // }
 
     return false;
 }
@@ -79,6 +85,7 @@ export const isOccupied = (row: number, col: number) => {
 
 export const isChangeAllowed = (row: number, col: number, newState: SpaceState) => {
     let allowed = false;
+    const oldState = getState(row, col);
     switch (newState) {
         case 'White':
         case 'Black':

@@ -15,7 +15,7 @@ import * as Game from './Game';
     // 7        \ \O\O\O\O\ \ \ \ \
     // 8         \ \ \ \ \ \ \ \ \ \
 
-const beforeEach = (() => {
+const setup = (() => {
     Game.initBoard();
     { // in a block for easy collapsing in editor
         Game.setState(1, 4, 'Black');
@@ -169,6 +169,7 @@ describe('Game state tests', () => {
         expect(Game.getState(8, 8)).toBe('Removed');
     });
     test('setState', () => {
+        setup();
         expect(Game.getState(1, 4)).toBe( 'Black');
         expect(Game.getState(1, 7)).toBe( 'Black');
         expect(Game.getState(2, 7)).toBe( 'Open');
@@ -176,6 +177,7 @@ describe('Game state tests', () => {
         expect(Game.getState(7, 4)).toBe( 'Removed');
     })
     test('getNeighbors', () => {
+        setup();
         //  \0\1\2\3\4\5\6\7\8\
         // 0 \ \ \ \ \ \ \ \ \ \
         // 1  \ \ \ \ \B\B\B\B\ \
@@ -212,6 +214,7 @@ describe('Game state tests', () => {
         }
     });
     test('getJumps', () => {
+        setup();
         Game.setState(2, 4, 'White');
         Game.setState(2, 5, 'White');
         Game.setState(2, 6, 'White');
@@ -246,8 +249,8 @@ describe('Game state tests', () => {
         ]
         expect(actual).toEqual(expected);
     });
-    test('isAllowed', () => {
-
+    test('canRemove', () => {
+        setup();
         Game.setState(4, 1, 'Removed');
         Game.setState(6, 1, 'Removed');
         Game.setState(6, 2, 'Removed');
@@ -258,22 +261,117 @@ describe('Game state tests', () => {
         // 3    \ \ \G\G\G\G\G\G\ \
         // 4     \ \ \O\O\O\O\O\O\ \
         // 5      \ \W\W\W\W\W\W\ \ \
-        // 6       \ \O\O\O\ \ \ \ \ \
+        // 6       \ \ \ \O\O\O\ \ \ \
         // 7        \ \ \ \ \ \ \ \ \ \
         // 8         \ \ \ \ \ \ \ \ \ \
 
-        const actual = Game.getJumps();
-        const expected = [
-            [false, false, false, false, false, false, false, false, false], // 0
-            [false, false, false, false, false, false, false, false, false], // 1
-            [false, false, false, false, true,  true,  true,  false, false], // 2
-            [false, false, false, false, false, false, false, false, false], // 3
-            [false, true,  false, false, false, false, false, true,  false], // 4
-            [false, false, false, false, false, false, false, false, false], // 5
-            [false, false, false, true,  false, false, false, false, false], // 6
-            [false, false, false, false, false, false, false, false, false], // 7
-            [false, false, false, false, false, false, false, false, false], // 8
-        ]
-        expect(actual).toEqual(expected);
+        expect(Game.canRemove(1, 1)).toBeFalsy();
+        expect(Game.canRemove(1, 2)).toBeFalsy();
+        expect(Game.canRemove(1, 3)).toBeFalsy();
+        expect(Game.canRemove(1, 4)).toBeFalsy();
+        expect(Game.canRemove(1, 5)).toBeFalsy();
+        expect(Game.canRemove(1, 6)).toBeFalsy();
+        expect(Game.canRemove(1, 7)).toBeFalsy();
+
+        expect(Game.canRemove(2, 1)).toBeFalsy();
+        expect(Game.canRemove(2, 2)).toBeFalsy();
+        expect(Game.canRemove(2, 3)).toBeTruthy();
+        expect(Game.canRemove(2, 4)).toBeFalsy();
+        expect(Game.canRemove(2, 5)).toBeFalsy();
+        expect(Game.canRemove(2, 6)).toBeFalsy();
+        expect(Game.canRemove(2, 7)).toBeTruthy();
+
+        expect(Game.canRemove(4, 1)).toBeFalsy();
+        expect(Game.canRemove(4, 2)).toBeFalsy();
+        expect(Game.canRemove(4, 3)).toBeFalsy();
+        expect(Game.canRemove(4, 4)).toBeFalsy();
+        expect(Game.canRemove(4, 5)).toBeFalsy();
+        expect(Game.canRemove(4, 6)).toBeFalsy();
+        expect(Game.canRemove(4, 7)).toBeTruthy();
+
+        expect(Game.canRemove(6, 1)).toBeFalsy();
+        expect(Game.canRemove(6, 2)).toBeFalsy();
+        expect(Game.canRemove(6, 3)).toBeTruthy();
+        expect(Game.canRemove(6, 4)).toBeTruthy();
+        expect(Game.canRemove(6, 5)).toBeTruthy();
+        expect(Game.canRemove(6, 6)).toBeFalsy();
+        expect(Game.canRemove(6, 7)).toBeFalsy();
+
+        expect(Game.canRemove(7, 1)).toBeFalsy();
+        expect(Game.canRemove(7, 2)).toBeFalsy();
+        expect(Game.canRemove(7, 3)).toBeFalsy();
+        expect(Game.canRemove(7, 4)).toBeFalsy();
+        expect(Game.canRemove(7, 5)).toBeFalsy();
+        expect(Game.canRemove(7, 6)).toBeFalsy();
+        expect(Game.canRemove(7, 7)).toBeFalsy();
+    });
+
+    test('Removed can\'t be changed', () => {
+        setup();
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\O\O\O\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \O\O\O\O\O\O\O\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        expect(Game.isChangeAllowed(1, 3, 'Black')).toBeFalsy();
+        expect(Game.isChangeAllowed(1, 3, 'Gray')).toBeFalsy();
+        expect(Game.isChangeAllowed(1, 3, 'White')).toBeFalsy();
+        expect(Game.isChangeAllowed(1, 3, 'Open')).toBeFalsy();
+        expect(Game.isChangeAllowed(1, 3, 'Removed')).toBeFalsy();
+    });
+    test('Occupied can only be set to Open', () => {
+        setup();
+
+        expect(Game.isChangeAllowed(1, 4, 'Black')).toBeFalsy();
+        expect(Game.isChangeAllowed(1, 4, 'Gray')).toBeFalsy();
+        expect(Game.isChangeAllowed(1, 4, 'White')).toBeFalsy();
+        expect(Game.isChangeAllowed(1, 4, 'Open')).toBeTruthy();
+        expect(Game.isChangeAllowed(1, 4, 'Removed')).toBeFalsy();
+    });
+
+    test('Allows removal of unblocked empty ring', () => {
+        setup();
+
+        expect(Game.isChangeAllowed(2, 3, 'Black')).toBeTruthy();
+        expect(Game.isChangeAllowed(2, 3, 'Gray')).toBeTruthy();
+        expect(Game.isChangeAllowed(2, 3, 'White')).toBeTruthy();
+        expect(Game.isChangeAllowed(2, 3, 'Open')).toBeFalsy();
+        expect(Game.isChangeAllowed(2, 3, 'Removed')).toBeTruthy();
+
+        expect(Game.isChangeAllowed(2, 7, 'Black')).toBeTruthy();
+        expect(Game.isChangeAllowed(2, 7, 'Gray')).toBeTruthy();
+        expect(Game.isChangeAllowed(2, 7, 'White')).toBeTruthy();
+        expect(Game.isChangeAllowed(2, 7, 'Open')).toBeFalsy();
+        expect(Game.isChangeAllowed(2, 7, 'Removed')).toBeTruthy();
+    });
+
+    test('Blocks removal of blocked empty ring', () => {
+        setup();
+        Game.setState(1, 4, 'Removed');
+        Game.setState(4, 7, 'Removed');
+        Game.setState(5, 1, 'Open');
+        Game.setState(5, 2, 'Open');
+        Game.setState(6, 1, 'Removed');
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \ \B\B\B\ \
+        // 2   \ \ \ \O\O\O\O\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \O\O\O\O\O\O\ \ \
+        // 5      \ \O\O\W\W\W\W\ \ \
+        // 6       \ \ \O\O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        expect(Game.isChangeAllowed(2, 4, 'Removed')).toBeFalsy();
+        expect(Game.isChangeAllowed(4, 2, 'Removed')).toBeFalsy();
+        expect(Game.isChangeAllowed(4, 7, 'Removed')).toBeFalsy();
+        expect(Game.isChangeAllowed(5, 2, 'Removed')).toBeFalsy();
     });
 });
