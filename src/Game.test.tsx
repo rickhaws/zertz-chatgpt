@@ -16,6 +16,7 @@ import * as Game from './Game';
     // 8         \ \ \ \ \ \ \ \ \ \
 
 const setup = (() => {
+
     Game.initBoard();
     { // in a block for easy collapsing in editor
         Game.setState(1, 4, 'Black');
@@ -190,29 +191,29 @@ describe('Game state tests', () => {
         // 8         \ \ \ \ \ \ \ \ \ \
 
         const spaces: [number[], string[]][] = [
-            [ [1,1], ['Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed'] ],
-            [ [1,4], ['Removed', 'Removed', 'Black',   'Open',    'Open',    'Removed', 'Removed'] ],
-            [ [1,6], ['Removed', 'Removed', 'Black',   'Open',    'Open',    'Black',   'Removed'] ],
-            [ [2,5], ['Black',   'Black',   'Open',    'Gray',    'Gray',    'Open',    'Black'] ],
-            [ [2,7], ['Black',   'Removed', 'Removed', 'Gray',    'Gray',    'Open',    'Black'] ],
-            [ [3,1], ['Removed', 'Removed', 'Gray',    'Open',    'Removed', 'Removed', 'Removed'] ],
-            [ [3,2], ['Removed', 'Open',    'Gray',    'Open',    'Open',    'Removed', 'Removed'] ],
-            [ [4,1], ['Removed', 'Gray',    'Open',    'White',   'Removed', 'Removed', 'Removed'] ],
-            [ [4,5], ['Gray',    'Gray',    'Open',    'White',   'White',   'Open',    'Gray'] ],
-            [ [4,7], ['Gray',    'Removed', 'Removed', 'Removed', 'White',   'Open',    'Gray'] ],
-            [ [7,1], ['Open',    'Open',    'Removed', 'Removed', 'Removed', 'Removed', 'Open']    ],
-            [ [7,2], ['Open',    'Open',    'Removed', 'Removed', 'Removed', 'Removed', 'Open']    ],
-            [ [7,3], ['Open',    'Open',    'Removed', 'Removed', 'Removed', 'Removed', 'Open']    ],
-            [ [7,4], ['Open',    'Open',    'Removed', 'Removed', 'Removed', 'Removed', 'Open']    ],
-            [ [7,5], ['Open',    'Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Open']    ],
-            [ [7,6], ['Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed'] ],
-            [ [7,7], ['Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed'] ],
+            [ [1,1], ['Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed',]],
+            [ [1,4], ['Removed', 'Removed', 'Black',   'Open',    'Open',    'Removed',]],
+            [ [1,6], ['Removed', 'Removed', 'Black',   'Open',    'Open',    'Black',]],
+            [ [2,5], ['Black',   'Black',   'Open',    'Gray',    'Gray',    'Open',]],
+            [ [2,7], ['Black',   'Removed', 'Removed', 'Gray',    'Gray',    'Open',]],
+            [ [3,1], ['Removed', 'Removed', 'Gray',    'Open',    'Removed', 'Removed',]],
+            [ [3,2], ['Removed', 'Open',    'Gray',    'Open',    'Open',    'Removed',]],
+            [ [4,1], ['Removed', 'Gray',    'Open',    'White',   'Removed', 'Removed',]],
+            [ [4,5], ['Gray',    'Gray',    'Open',    'White',   'White',   'Open',]],
+            [ [4,7], ['Gray',    'Removed', 'Removed', 'Removed', 'White',   'Open',]],
+            [ [7,1], ['Open',    'Open',    'Removed', 'Removed', 'Removed', 'Removed',]],
+            [ [7,2], ['Open',    'Open',    'Removed', 'Removed', 'Removed', 'Removed',]],
+            [ [7,3], ['Open',    'Open',    'Removed', 'Removed', 'Removed', 'Removed',]],
+            [ [7,4], ['Open',    'Open',    'Removed', 'Removed', 'Removed', 'Removed',]],
+            [ [7,5], ['Open',    'Removed', 'Removed', 'Removed', 'Removed', 'Removed',]],
+            [ [7,6], ['Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed',]],
+            [ [7,7], ['Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed',]],
         ]
         for (let [[i, j], neighbors] of spaces) {
-            //*/console.log(`Checking cell${i},${j}`)
             expect(Game.getNeighbors(i, j)).toEqual(neighbors);
         }
     });
+
     test('getJumps', () => {
         setup();
         Game.setState(2, 4, 'White');
@@ -220,18 +221,20 @@ describe('Game state tests', () => {
         Game.setState(2, 6, 'White');
 
         Game.setState(4, 1, 'Black');
+        Game.setState(4, 4, 'Black');
         Game.setState(4, 7, 'Black');
 
-        Game.setState(6, 3, 'Gray');
+        Game.setState(6, 4, 'Gray');
+        Game.setState(6, 5, 'Gray');
 
         //  \0\1\2\3\4\5\6\7\8\
         // 0 \ \ \ \ \ \ \ \ \ \
         // 1  \ \ \ \ \B\B\B\B\ \
         // 2   \ \ \ \O\W\W\W\O\ \
         // 3    \ \ \G\G\G\G\G\G\ \
-        // 4     \ \B\O\O\O\O\O\B\ \
+        // 4     \ \B\O\O\B\O\O\B\ \
         // 5      \ \W\W\W\W\W\W\ \ \
-        // 6       \ \O\O\G\O\O\ \ \ \
+        // 6       \ \O\O\O\G\G\ \ \ \
         // 7        \ \ \ \ \ \ \ \ \ \
         // 8         \ \ \ \ \ \ \ \ \ \
 
@@ -241,9 +244,9 @@ describe('Game state tests', () => {
             [false, false, false, false, false, false, false, false, false], // 1
             [false, false, false, false, true,  true,  true,  false, false], // 2
             [false, false, false, false, false, false, false, false, false], // 3
-            [false, true,  false, false, false, false, false, true,  false], // 4
+            [false, true,  false, false, true,  false, false, true,  false], // 4
             [false, false, false, false, false, false, false, false, false], // 5
-            [false, false, false, true,  false, false, false, false, false], // 6
+            [false, false, false, false, true,  true,  false, false, false], // 6
             [false, false, false, false, false, false, false, false, false], // 7
             [false, false, false, false, false, false, false, false, false], // 8
         ]
@@ -373,5 +376,22 @@ describe('Game state tests', () => {
         expect(Game.isChangeAllowed(4, 2, 'Removed')).toBeFalsy();
         expect(Game.isChangeAllowed(4, 7, 'Removed')).toBeFalsy();
         expect(Game.isChangeAllowed(5, 2, 'Removed')).toBeFalsy();
+    });
+
+    test('toString', () => {
+        Game.initBoard();
+        const expected = 
+`\\0\\1\\2\\3\\4\\5\\6\\7\\8\\
+0\\ \\ \\ \\ \\ \\ \\ \\ \\ \\
+1 \\ \\ \\ \\ \\O\\O\\O\\O\\ \\
+2  \\ \\ \\ \\O\\O\\O\\O\\O\\ \\
+3   \\ \\ \\O\\O\\O\\O\\O\\O\\ \\
+4    \\ \\O\\O\\O\\O\\O\\O\\O\\ \\
+5     \\ \\O\\O\\O\\O\\O\\O\\ \\ \\
+6      \\ \\O\\O\\O\\O\\O\\ \\ \\ \\
+7       \\ \\O\\O\\O\\O\\ \\ \\ \\ \\
+8        \\ \\ \\ \\ \\ \\ \\ \\ \\ \\`;
+
+        expect(Game.toString()).toEqual(expected);
     });
 });

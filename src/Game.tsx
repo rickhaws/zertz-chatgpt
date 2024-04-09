@@ -21,12 +21,22 @@ const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOAR
 
 export const initBoard = () => {
     for (let i = 0; i < BOARD_SIZE + 2; i++) {
-        board[0][i] = 'Removed';
-        board[i][0] = 'Removed';
-        board[BOARD_SIZE + 1][i] = 'Removed';
-        board[i][BOARD_SIZE + 1] = 'Removed';
+        // First, set all to Open
+        for (let j = 0; j < BOARD_SIZE + 2; j++) {
+            board[i][j] = 'Open';
+        }
     }
 
+        // Set all edges to 'Removed'
+    for (let k = 0; k < BOARD_SIZE + 2; k++) {
+            board[0][k] = 'Removed';
+        board[k][0] = 'Removed';
+        board[BOARD_SIZE + 1][k] = 'Removed';
+        board[k][BOARD_SIZE + 1] = 'Removed';
+    }
+
+    // Set upper-left and bottom-right corners to Removed
+    // for hexagonal configuration
     for (let i = 1; i <= 3; i++) {
         for (let j = 1; j <= 4 - i; j++) {
             board[i][j] = 'Removed';
@@ -41,14 +51,13 @@ export const canRemove = (row: number, col: number) =>
 {
     if (board[row][col] !== 'Open') return false;
 
-
     const neighbors = getNeighbors(row, col);
 
     // If any two neighbors in a row are Removed,
     // then this space can be removed
     for (let i of [0, 1, 2, 3, 4, 5]) {
-        if (neighbors[i % 6] === 'Removed'
-        && neighbors[i+1 % 6] === 'Removed') {
+        if (neighbors[i] === 'Removed'
+        && neighbors[(i+1) % 6] === 'Removed') {
             return true;
         }
     }
@@ -72,7 +81,6 @@ export const canRemove = (row: number, col: number) =>
         board[row + 1][col],
         board[row + 1][col - 1],
         board[row][col - 1],
-        board[row - 1][col]
     ];
     return neighbors;
 }
@@ -85,7 +93,6 @@ export const isOccupied = (row: number, col: number) => {
 
 export const isChangeAllowed = (row: number, col: number, newState: SpaceState) => {
     let allowed = false;
-    const oldState = getState(row, col);
     switch (newState) {
         case 'White':
         case 'Black':
@@ -98,6 +105,7 @@ export const isChangeAllowed = (row: number, col: number, newState: SpaceState) 
         case 'Removed':
             allowed = canRemove(row, col);
     }
+    // /* */ console.log('Allowed', allowed)
     return allowed;
 }
 
@@ -146,4 +154,22 @@ export const getJumps = () => {
         }
     }
     return jumps;
+}
+
+export const toString = () => {
+    const symbols = {
+        'Removed': ' ',
+        'Open': 'O',
+        'White': 'W',
+        'Black': 'B',
+        'Gray': 'G',
+    }
+    let output = '\\0\\1\\2\\3\\4\\5\\6\\7\\8\\';
+    for (let i = 0; i < BOARD_SIZE + 2; i++) {
+        output += '\n' + i +' '.repeat(i) + '\\';
+        for (let j = 0; j < BOARD_SIZE + 2; j++) {
+            output += symbols[getState(i, j)] + '\\';
+        }
+    }
+    return output;
 }
