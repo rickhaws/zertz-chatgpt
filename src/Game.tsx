@@ -43,9 +43,22 @@ export const initBoard = () => {
             board[BOARD_SIZE-i+1][BOARD_SIZE-j+1] = 'Removed';
         }
     }
-}
+};
 
 export const getState = (row: number, col: number) => board[row][col];
+
+// List neighbor cells in circular fashion, beginning at upper-left.
+export const getNeighbors = (row: number, col: number): SpaceState[] => {
+    const neighbors: SpaceState[] = [
+        board[row - 1][col],
+        board[row - 1][col + 1],
+        board[row][col + 1],
+        board[row + 1][col],
+        board[row + 1][col - 1],
+        board[row][col - 1],
+    ];
+    return neighbors;
+};
 
 export const canRemove = (row: number, col: number) =>
 {
@@ -69,27 +82,13 @@ export const canRemove = (row: number, col: number) =>
     // }
 
     return false;
-}
-
-    // List neighbor cells in circular fashion, beginning at upper-left and 
-    // repeating first at the end.
-    export const getNeighbors = (row: number, col: number): SpaceState[] => {
-    const neighbors: SpaceState[] = [
-        board[row - 1][col],
-        board[row - 1][col + 1],
-        board[row][col + 1],
-        board[row + 1][col],
-        board[row + 1][col - 1],
-        board[row][col - 1],
-    ];
-    return neighbors;
-}
+};
 
 export const isOccupied = (row: number, col: number) => {
     return (board[row][col] === 'White' ||
             board[row][col] === 'Gray' ||
             board[row][col] === 'Black');
-}
+};
 
 export const isChangeAllowed = (row: number, col: number, newState: SpaceState) => {
     let allowed = false;
@@ -116,7 +115,7 @@ export const setState = (row: number, col: number, newState: SpaceState) => {
     } else {
         return false;
     }
-}
+};
 
 export const getJumps = () => {
     // For each occupied ring, calculate whether the stone there can make any jumps,
@@ -154,7 +153,7 @@ export const getJumps = () => {
         }
     }
     return jumps;
-}
+};
 
 export const toString = () => {
     const symbols = {
@@ -172,4 +171,4 @@ export const toString = () => {
         }
     }
     return output;
-}
+};
