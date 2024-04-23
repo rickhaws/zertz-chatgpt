@@ -19,49 +19,49 @@ const setup = (() => {
 
     Game.initBoard();
     { // in a block for easy collapsing in editor
-        Game.setState(1, 4, 'Black');
-        Game.setState(1, 5, 'Black');
-        Game.setState(1, 6, 'Black');
-        Game.setState(1, 7, 'Black');
+        Game.setState('Black', 1, 4);
+        Game.setState('Black', 1, 5);
+        Game.setState('Black', 1, 6);
+        Game.setState('Black', 1, 7);
         
-        Game.setState(2, 3, 'Open');
-        Game.setState(2, 4, 'Open');
-        Game.setState(2, 5, 'Open');
-        Game.setState(2, 6, 'Open');
-        Game.setState(2, 7, 'Open');
+        Game.setState('Open', 2, 3);
+        Game.setState('Open', 2, 4);
+        Game.setState('Open', 2, 5);
+        Game.setState('Open', 2, 6);
+        Game.setState('Open', 2, 7);
         
-        Game.setState(3, 2, 'Gray');
-        Game.setState(3, 3, 'Gray');
-        Game.setState(3, 4, 'Gray');
-        Game.setState(3, 5, 'Gray');
-        Game.setState(3, 6, 'Gray');
-        Game.setState(3, 7, 'Gray');
+        Game.setState('Gray', 3, 2);
+        Game.setState('Gray', 3, 3);
+        Game.setState('Gray', 3, 4);
+        Game.setState('Gray', 3, 5);
+        Game.setState('Gray', 3, 6);
+        Game.setState('Gray', 3, 7);
         
-        Game.setState(4, 1, 'Open');
-        Game.setState(4, 2, 'Open');
-        Game.setState(4, 3, 'Open');
-        Game.setState(4, 4, 'Open');
-        Game.setState(4, 5, 'Open');
-        Game.setState(4, 6, 'Open');
-        Game.setState(4, 7, 'Open');
+        Game.setState('Open', 4, 1);
+        Game.setState('Open', 4, 2);
+        Game.setState('Open', 4, 3);
+        Game.setState('Open', 4, 4);
+        Game.setState('Open', 4, 5);
+        Game.setState('Open', 4, 6);
+        Game.setState('Open', 4, 7);
         
-        Game.setState(5, 1, 'White');
-        Game.setState(5, 2, 'White');
-        Game.setState(5, 3, 'White');
-        Game.setState(5, 4, 'White');
-        Game.setState(5, 5, 'White');
-        Game.setState(5, 6, 'White');
+        Game.setState('White', 5, 1);
+        Game.setState('White', 5, 2);
+        Game.setState('White', 5, 3);
+        Game.setState('White', 5, 4);
+        Game.setState('White', 5, 5);
+        Game.setState('White', 5, 6);
         
-        Game.setState(6, 1, 'Open');
-        Game.setState(6, 2, 'Open');
-        Game.setState(6, 3, 'Open');
-        Game.setState(6, 4, 'Open');
-        Game.setState(6, 5, 'Open');
+        Game.setState('Open', 6, 1);
+        Game.setState('Open', 6, 2);
+        Game.setState('Open', 6, 3);
+        Game.setState('Open', 6, 4);
+        Game.setState('Open', 6, 5);
         
-        Game.setState(7, 1, 'Removed');
-        Game.setState(7, 2, 'Removed');
-        Game.setState(7, 3, 'Removed');
-        Game.setState(7, 4, 'Removed');
+        Game.setState('Removed', 7, 1);
+        Game.setState('Removed', 7, 2);
+        Game.setState('Removed', 7, 3);
+        Game.setState('Removed', 7, 4);
     }
 
     //  \0\1\2\3\4\5\6\7\8\
@@ -210,22 +210,22 @@ describe('Game state tests', () => {
             [ [7,7], ['Removed', 'Removed', 'Removed', 'Removed', 'Removed', 'Removed',]],
         ]
         for (let [[i, j], neighbors] of spaces) {
-            expect(Game.getNeighbors(i, j)).toEqual(neighbors);
+            expect(Game.getNeighborStates(i, j)).toEqual(neighbors);
         }
     });
 
     test('getJumps', () => {
         setup();
-        Game.setState(2, 4, 'White');
-        Game.setState(2, 5, 'White');
-        Game.setState(2, 6, 'White');
+        Game.setState('White', 2, 4);
+        Game.setState('White', 2, 5);
+        Game.setState('White', 2, 6);
 
-        Game.setState(4, 1, 'Black');
-        Game.setState(4, 4, 'Black');
-        Game.setState(4, 7, 'Black');
+        Game.setState('Black', 4, 1);
+        Game.setState('Black', 4, 4);
+        Game.setState('Black', 4, 7);
 
-        Game.setState(6, 4, 'Gray');
-        Game.setState(6, 5, 'Gray');
+        Game.setState('Gray', 6, 4);
+        Game.setState('Gray', 6, 5);
 
         //  \0\1\2\3\4\5\6\7\8\
         // 0 \ \ \ \ \ \ \ \ \ \
@@ -252,11 +252,39 @@ describe('Game state tests', () => {
         ]
         expect(actual).toEqual(expected);
     });
+
+    test('jump', () => {
+        setup();
+        Game.setState('White', 2, 4);
+        Game.setState('White', 2, 5);
+        Game.setState('White', 2, 6);
+
+        Game.setState('Black', 4, 1);
+        Game.setState('Black', 4, 4);
+        Game.setState('Black', 4, 7);
+
+        Game.setState('Gray', 6, 4);
+        Game.setState('Gray', 6, 5);
+
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\W\W\W\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \B\O\O\B\O\O\B\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\G\G\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        throw('Not Implemented')
+    });
+
     test('canRemove', () => {
         setup();
-        Game.setState(4, 1, 'Removed');
-        Game.setState(6, 1, 'Removed');
-        Game.setState(6, 2, 'Removed');
+        Game.setState('Removed', 4, 1);
+        Game.setState('Removed', 6, 1);
+        Game.setState('Removed', 6, 2);
         //  \0\1\2\3\4\5\6\7\8\
         // 0 \ \ \ \ \ \ \ \ \ \
         // 1  \ \ \ \ \B\B\B\B\ \
@@ -356,11 +384,11 @@ describe('Game state tests', () => {
 
     test('Blocks removal of blocked empty ring', () => {
         setup();
-        Game.setState(1, 4, 'Removed');
-        Game.setState(4, 7, 'Removed');
-        Game.setState(5, 1, 'Open');
-        Game.setState(5, 2, 'Open');
-        Game.setState(6, 1, 'Removed');
+        Game.setState('Removed', 1, 4);
+        Game.setState('Removed', 4, 7);
+        Game.setState('Open', 5, 1);
+        Game.setState('Open', 5, 2);
+        Game.setState('Removed', 6, 1);
         //  \0\1\2\3\4\5\6\7\8\
         // 0 \ \ \ \ \ \ \ \ \ \
         // 1  \ \ \ \ \ \B\B\B\ \

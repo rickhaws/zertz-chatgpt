@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Ring from './Ring';
 import Ball from './Ball';
-import { getNeighbors, canRemove, SpaceState } from './Game';
+import { getNeighborStates, canRemove, SpaceState } from './Game';
 
 interface BoardProps { }
 interface Circle {

@@ -4,6 +4,37 @@ export const BOARD_SIZE = 7;
 
 const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
 
+class Coordinate  {
+    static NW = new Coordinate(-1, 0);
+    static NE = new Coordinate(-1, 1);
+    static E = new Coordinate(0, 1);
+    static SE = new Coordinate(1, 0);
+    static SW = new Coordinate(1, -1);
+    static W = new Coordinate(0, -1);
+    static directions = [Coordinate.NW, Coordinate.NE, Coordinate.E, Coordinate.SE, Coordinate.SW, Coordinate.W];
+
+    row: number;
+    column: number
+
+    constructor(row: number, column: number) {
+        this.row = row;
+        this.column = column;
+    }
+
+    getNeighbor(direction: Coordinate) {
+        return new Coordinate(this.row + direction.row, this.column + direction.column);
+    };
+
+    getNeighbors() {
+        return Coordinate.directions.map(d => this.getNeighbor(d));
+    };
+
+    // get NE() {
+    //     return this.getNeighbor(Coordinate.NE))
+    // }
+
+}
+
 // Representation of Zertz board.
 // Note that rows 0 & 8 and columns 0 & 8
 //    are empty so that all cells in 1-7
@@ -21,50 +52,50 @@ const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOAR
 
 export const initBoard = () => {
     for (let i = 0; i < BOARD_SIZE + 2; i++) {
-        // First, set all to Open
         for (let j = 0; j < BOARD_SIZE + 2; j++) {
-            board[i][j] = 'Open';
+            board[i][j] = 'Removed';
         }
     }
 
-        // Set all edges to 'Removed'
-    for (let k = 0; k < BOARD_SIZE + 2; k++) {
-            board[0][k] = 'Removed';
-        board[k][0] = 'Removed';
-        board[BOARD_SIZE + 1][k] = 'Removed';
-        board[k][BOARD_SIZE + 1] = 'Removed';
-    }
+    for (let row = 1; row <= BOARD_SIZE; row++) {
+        const trim = Math.ceil(BOARD_SIZE / 2) - row;   // [3, 2, 1, 0, -1, -2, -3]
+        const start = Math.max(1, trim + 1);            // [4, 3, 2, 1, 1, 1, 1]
+        const end = BOARD_SIZE + Math.min(0, trim);     // [7, 7, 7, 7, 6, 5, 4]
 
-    // Set upper-left and bottom-right corners to Removed
-    // for hexagonal configuration
-    for (let i = 1; i <= 3; i++) {
-        for (let j = 1; j <= 4 - i; j++) {
-            board[i][j] = 'Removed';
-            board[BOARD_SIZE-i+1][BOARD_SIZE-j+1] = 'Removed';
+        for (let j = start; j <= end; j++) {
+            board[row][j] = 'Open';
         }
     }
 };
 
-export const getState = (row: number, col: number) => board[row][col];
+export const getState = (rowOrCoordinate: number | Coordinate, col?: number) => {
+
+    if (rowOrCoordinate instanceof Coordinate) {
+        col = rowOrCoordinate.column;
+        rowOrCoordinate = rowOrCoordinate.row;
+    }
+    return board[rowOrCoordinate][col!];
+}
 
 // List neighbor cells in circular fashion, beginning at upper-left.
-export const getNeighbors = (row: number, col: number): SpaceState[] => {
-    const neighbors: SpaceState[] = [
-        board[row - 1][col],
-        board[row - 1][col + 1],
-        board[row][col + 1],
-        board[row + 1][col],
-        board[row + 1][col - 1],
-        board[row][col - 1],
-    ];
-    return neighbors;
+export const getNeighborStates = (row: number, col: number): SpaceState[] => {
+    const coord = new Coordinate(row, col);
+    // const neighbors: SpaceState[] = [
+    //     board[row - 1][col],
+    //     board[row - 1][col + 1],
+    //     board[row][col + 1],
+    //     board[row + 1][col],
+    //     board[row + 1][col - 1],
+    //     board[row][col - 1],
+    // ];
+    return coord.getNeighbors().map(c => getState(c));
 };
 
 export const canRemove = (row: number, col: number) =>
 {
     if (board[row][col] !== 'Open') return false;
 
-    const neighbors = getNeighbors(row, col);
+    const neighbors = getNeighborStates(row, col);
 
     // If any two neighbors in a row are Removed,
     // then this space can be removed
@@ -74,12 +105,6 @@ export const canRemove = (row: number, col: number) =>
             return true;
         }
     }
-    // let previous: SpaceState = 'Open';
-    // for (let current of neighbors)
-    // {
-    //     if (previous === 'Removed' && current === 'Removed') return true;
-    //     previous = current;
-    // }
 
     return false;
 };
@@ -108,9 +133,13 @@ export const isChangeAllowed = (row: number, col: number, newState: SpaceState) 
     return allowed;
 }
 
-export const setState = (row: number, col: number, newState: SpaceState) => {
-    if (isChangeAllowed(row, col, newState)) {
-        board[row][col] = newState;
+export const setState = (newState: SpaceState, rowOrCoordinate: number | Coordinate, col?: number) => {
+     if (rowOrCoordinate instanceof Coordinate) {
+        col = rowOrCoordinate.column;
+        rowOrCoordinate = rowOrCoordinate.row;
+    }
+   if (isChangeAllowed(rowOrCoordinate, col!, newState)) {
+        board[rowOrCoordinate][col!] = newState;
         return true;
     } else {
         return false;
@@ -131,25 +160,35 @@ export const getJumps = () => {
                 continue;
             } 
 
-            // only one condition need be met for the ring to have a jump possible
-            else if (isOccupied(i, j+1) && board[i][j+2] === 'Open') { // check for straight right jump
-                jumps[i][j] = true;
+            for (let d of Coordinate.directions) {
+                const here = new Coordinate(i, j);
+                const neighbor = here.getNeighbor(d);
+                const destination = neighbor.getNeighbor(d);
+                if (isOccupied(neighbor.row, neighbor.column) && getState(destination) === "Open") {
+                    jumps[i][j] = true;
+                    break; // go to next cell
+                }
             }
-            else if (isOccupied(i, j-1) && board[i][j-2] === 'Open') { // check for straight left jump
-                jumps[i][j] = true;
-            }
-            else if (isOccupied(i-1, j) && board[i-2][j] === 'Open') { // check for up left diagonal jump
-                jumps[i][j] = true;
-            }
-            else if (isOccupied(i-1, j+1) && board[i-2][j+2] === 'Open') { // check for up right diagonal jump
-                jumps[i][j] = true;
-            }
-            else if(isOccupied(i+1, j) && board[i+2][j] === 'Open') { // check for down right diagonal jump
-                jumps[i][j] = true;
-            }
-            else if (isOccupied(i+1, j-1) && board[i+2][j-2] === 'Open') { // check for down left diagonal jump
-                jumps[i][j] = true;
-            }
+
+            // // only one condition need be met for the ring to have a jump possible
+            // else if (isOccupied(i, j+1) && board[i][j+2] === 'Open') { // check for straight right jump
+            //     jumps[i][j] = true;
+            // }
+            // else if (isOccupied(i, j-1) && board[i][j-2] === 'Open') { // check for straight left jump
+            //     jumps[i][j] = true;
+            // }
+            // else if (isOccupied(i-1, j) && board[i-2][j] === 'Open') { // check for up left diagonal jump
+            //     jumps[i][j] = true;
+            // }
+            // else if (isOccupied(i-1, j+1) && board[i-2][j+2] === 'Open') { // check for up right diagonal jump
+            //     jumps[i][j] = true;
+            // }
+            // else if(isOccupied(i+1, j) && board[i+2][j] === 'Open') { // check for down right diagonal jump
+            //     jumps[i][j] = true;
+            // }
+            // else if (isOccupied(i+1, j-1) && board[i+2][j-2] === 'Open') { // check for down left diagonal jump
+            //     jumps[i][j] = true;
+            // }
         }
     }
     return jumps;
