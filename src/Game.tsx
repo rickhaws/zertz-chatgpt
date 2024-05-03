@@ -1,9 +1,14 @@
+import { dir } from 'console';
+
 export type SpaceState = 'Removed' | 'Open' | 'White' | 'Gray' | 'Black';
 
 export const BOARD_SIZE = 7;
 
 const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
 
+/**
+ * Convenience class to simplify working with neighbors
+ */
 class Coordinate  {
     static NW = new Coordinate(-1, 0);
     static NE = new Coordinate(-1, 1);
@@ -34,6 +39,17 @@ class Coordinate  {
     // }
 
 }
+
+const coord = (row: number, col: number) => new Coordinate(row, col);
+
+export const Direction = {
+    NW: Coordinate.NW, 
+    NE: Coordinate.NE, 
+    E: Coordinate.E, 
+    SE: Coordinate.SE, 
+    SW: Coordinate.SW, 
+    W: Coordinate.W,
+};
 
 // Representation of Zertz board.
 // Note that rows 0 & 8 and columns 0 & 8
@@ -68,32 +84,18 @@ export const initBoard = () => {
     }
 };
 
-export const getState = (rowOrCoordinate: number | Coordinate, col?: number) => {
-
-    if (rowOrCoordinate instanceof Coordinate) {
-        col = rowOrCoordinate.column;
-        rowOrCoordinate = rowOrCoordinate.row;
-    }
-    return board[rowOrCoordinate][col!];
+export const getState = (row: number, col: number) => {
+    return board[row][col!];
 }
 
 // List neighbor cells in circular fashion, beginning at upper-left.
 export const getNeighborStates = (row: number, col: number): SpaceState[] => {
-    const coord = new Coordinate(row, col);
-    // const neighbors: SpaceState[] = [
-    //     board[row - 1][col],
-    //     board[row - 1][col + 1],
-    //     board[row][col + 1],
-    //     board[row + 1][col],
-    //     board[row + 1][col - 1],
-    //     board[row][col - 1],
-    // ];
-    return coord.getNeighbors().map(c => getState(c));
+    return coord(row, col).getNeighbors().map(c => getState(c.row, c.column));
 };
 
 export const canRemove = (row: number, col: number) =>
 {
-    if (board[row][col] !== 'Open') return false;
+    if (getState(row, col) !== 'Open') return false;
 
     const neighbors = getNeighborStates(row, col);
 
@@ -110,9 +112,9 @@ export const canRemove = (row: number, col: number) =>
 };
 
 export const isOccupied = (row: number, col: number) => {
-    return (board[row][col] === 'White' ||
-            board[row][col] === 'Gray' ||
-            board[row][col] === 'Black');
+    return (getState(row, col) === 'White' ||
+            getState(row, col) === 'Gray' ||
+            getState(row, col) === 'Black');
 };
 
 export const isChangeAllowed = (row: number, col: number, newState: SpaceState) => {
@@ -121,7 +123,7 @@ export const isChangeAllowed = (row: number, col: number, newState: SpaceState) 
         case 'White':
         case 'Black':
         case 'Gray':
-            allowed = (board[row][col] === 'Open');
+            allowed = (getState(row, col) === 'Open');
             break;
         case 'Open':
             allowed = isOccupied(row, col);
@@ -146,6 +148,15 @@ export const setState = (newState: SpaceState, rowOrCoordinate: number | Coordin
     }
 };
 
+export const canJump = (row: number, col: number, direction: Coordinate): boolean => {
+    const cell = coord(row, col);
+    const neighbor = cell.getNeighbor(direction);
+    const destination = neighbor.getNeighbor(direction);
+    return (isOccupied(cell.row, cell.column) 
+        && isOccupied(neighbor.row, neighbor.column) 
+        && getState(destination.row, destination.column) === 'Open');
+};
+
 export const getJumps = () => {
     // For each occupied ring, calculate whether the stone there can make any jumps,
     // then return a boolean mask of the board where stones with jumps available are
@@ -156,43 +167,35 @@ export const getJumps = () => {
     for (let i = 0; i < jumps.length; i++) {
         for (let j = 0; j < jumps[i].length; j++) {
 
-            if (!isOccupied(i,j)) { // Ignore unoccupied rings
+            if (!isOccupied(i,j)) { // 'false' for unoccupied rings
                 continue;
             } 
 
-            for (let d of Coordinate.directions) {
-                const here = new Coordinate(i, j);
-                const neighbor = here.getNeighbor(d);
-                const destination = neighbor.getNeighbor(d);
-                if (isOccupied(neighbor.row, neighbor.column) && getState(destination) === "Open") {
+            for (let direction of Coordinate.directions) {
+                if (canJump(i, j, direction)) {
                     jumps[i][j] = true;
                     break; // go to next cell
                 }
             }
-
-            // // only one condition need be met for the ring to have a jump possible
-            // else if (isOccupied(i, j+1) && board[i][j+2] === 'Open') { // check for straight right jump
-            //     jumps[i][j] = true;
-            // }
-            // else if (isOccupied(i, j-1) && board[i][j-2] === 'Open') { // check for straight left jump
-            //     jumps[i][j] = true;
-            // }
-            // else if (isOccupied(i-1, j) && board[i-2][j] === 'Open') { // check for up left diagonal jump
-            //     jumps[i][j] = true;
-            // }
-            // else if (isOccupied(i-1, j+1) && board[i-2][j+2] === 'Open') { // check for up right diagonal jump
-            //     jumps[i][j] = true;
-            // }
-            // else if(isOccupied(i+1, j) && board[i+2][j] === 'Open') { // check for down right diagonal jump
-            //     jumps[i][j] = true;
-            // }
-            // else if (isOccupied(i+1, j-1) && board[i+2][j-2] === 'Open') { // check for down left diagonal jump
-            //     jumps[i][j] = true;
-            // }
         }
     }
     return jumps;
 };
+
+export const jump = (row: number, col: number, direction: Coordinate) => {
+    if (!canJump(row, col, direction)) {
+        return '';
+    }
+    const origin = coord(row, col);
+    const neighbor = origin.getNeighbor(direction);
+    const destination = neighbor.getNeighbor(direction);
+    const movedBall = getState(row, col);
+    const removedBall = getState(neighbor.row, neighbor.column);
+    setState('Open', row, col);
+    setState('Open', neighbor.row, neighbor.column);
+    setState(movedBall, destination.row, destination.column);
+    return removedBall;
+}
 
 export const toString = () => {
     const symbols = {

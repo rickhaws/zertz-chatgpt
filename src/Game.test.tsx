@@ -253,7 +253,7 @@ describe('Game state tests', () => {
         expect(actual).toEqual(expected);
     });
 
-    test('jump', () => {
+    test('canJump', () => {
         setup();
         Game.setState('White', 2, 4);
         Game.setState('White', 2, 5);
@@ -277,7 +277,120 @@ describe('Game state tests', () => {
         // 7        \ \ \ \ \ \ \ \ \ \
         // 8         \ \ \ \ \ \ \ \ \ \
 
-        throw('Not Implemented')
+        expect(Game.canJump(3, 7, Game.Direction.NW)).toBeFalsy(); // Neighbor unoccupied NW
+        expect(Game.canJump(4, 7, Game.Direction.NW)).toBeTruthy();
+        expect(Game.canJump(3, 2, Game.Direction.NE)).toBeFalsy(); // Neighbor unoccupied NE
+        expect(Game.canJump(4, 1, Game.Direction.NE)).toBeTruthy();
+        expect(Game.canJump(2, 4, Game.Direction.E)).toBeFalsy(); // Destination occupied E
+        expect(Game.canJump(2, 5, Game.Direction.E)).toBeTruthy();
+        expect(Game.canJump(1, 6, Game.Direction.SE)).toBeFalsy(); // Destination occupied SE
+        expect(Game.canJump(2, 6, Game.Direction.SE)).toBeTruthy();
+        expect(Game.canJump(3, 5, Game.Direction.SW)).toBeFalsy(); // Destination occupied SW
+        expect(Game.canJump(4, 4, Game.Direction.SW)).toBeTruthy();
+        expect(Game.canJump(2, 4, Game.Direction.W)).toBeFalsy(); // Neighbor unoccupied W
+        expect(Game.canJump(2, 5, Game.Direction.W)).toBeTruthy();
+        expect(Game.canJump(2, 3, Game.Direction.W)).toBeFalsy(); // Space unoccupied
+        expect(Game.canJump(2, 2, Game.Direction.W)).toBeFalsy(); // Space removed
+    });
+
+    test('jump success', () => {
+        setup();
+        Game.setState('White', 2, 4);
+        Game.setState('White', 2, 5);
+        Game.setState('White', 2, 6);
+
+        Game.setState('Black', 4, 1);
+        Game.setState('Black', 4, 4);
+        Game.setState('Black', 4, 7);
+
+        Game.setState('Gray', 6, 4);
+        Game.setState('Gray', 6, 5);
+
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\W\W\W\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \B\O\O\B\O\O\B\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\G\G\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        let result;
+        result = Game.jump(4, 7, Game.Direction.NW);
+        expect(result).toBe('Gray');
+        expect(Game.getState(4, 7)).toBe('Open');
+        expect(Game.getState(2, 7)).toBe('Black');
+        expect(Game.getNeighborStates(4, 7)).toEqual(['Open', 'Removed', 'Removed', 'Removed', 'White', 'Open']);
+
+        result = Game.jump(6, 5, Game.Direction.NE);
+        expect(result).toBe('White');
+        expect(Game.getState(6, 5)).toBe('Open');
+        expect(Game.getState(4, 7)).toBe('Gray');
+        expect(Game.getNeighborStates(6, 5)).toEqual(['White', 'Open', 'Removed', 'Removed', 'Removed', 'Gray']);
+
+        result = Game.jump(4, 4, Game.Direction.SW);
+        expect(result).toBe('White');
+        expect(Game.getState(4, 4)).toBe('Open');
+        expect(Game.getState(6, 2)).toBe('Black');
+        expect(Game.getNeighborStates(4, 4)).toEqual(['Gray', 'Gray', 'Open', 'White', 'Open', 'Open']);
+    });
+
+    test('jump not allowed', () => {
+        setup();
+        Game.setState('White', 2, 4);
+        Game.setState('White', 2, 5);
+        Game.setState('White', 2, 6);
+
+        Game.setState('Black', 4, 1);
+        Game.setState('Black', 4, 4);
+        Game.setState('Black', 4, 7);
+
+        Game.setState('Gray', 6, 4);
+        Game.setState('Gray', 6, 5);
+
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\W\W\W\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \B\O\O\B\O\O\B\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\G\G\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        let result;
+        result = Game.jump(3, 7, Game.Direction.NW); // Neighbor in that direction unoccupied
+        expect(result).toBe('');
+        expect(Game.getState(2, 7)).toBe('Open');
+        expect(Game.getState(4, 7)).toBe('Black');
+        expect(Game.getNeighborStates(4, 7)).toEqual(['Gray', 'Removed', 'Removed', 'Removed', 'White', 'Open']);
+
+        result = Game.jump(3, 7, Game.Direction.SE); // Destination 'Removed'
+        expect(result).toBe('');
+        expect(Game.getState(6, 7)).toBe('Removed');
+        expect(Game.getState(4, 7)).toBe('Black');
+        expect(Game.getNeighborStates(4, 7)).toEqual(['Gray', 'Removed', 'Removed', 'Removed', 'White', 'Open']);
+
+        result = Game.jump(2, 3, Game.Direction.NE); // Space is unoccupied
+        expect(result).toBe('');
+        expect(Game.getState(0, 3)).toBe('Removed');
+        expect(Game.getState(2, 3)).toBe('Open');
+        expect(Game.getNeighborStates(2, 3)).toEqual(['Removed', 'Black', 'White', 'Gray', 'Gray', 'Removed']);
+
+        result = Game.jump(2, 2, Game.Direction.SE); // Space is 'Removed'
+        expect(result).toBe('');
+        expect(Game.getState(2, 2)).toBe('Removed');
+        expect(Game.getState(4, 2)).toBe('Open');
+        expect(Game.getNeighborStates(2, 2)).toEqual(['Removed', 'Removed', 'Open', 'Gray', 'Removed', 'Removed']);
+
+        result = Game.jump(3, 4, Game.Direction.SE); // Destination occupied
+        expect(result).toBe('');
+        expect(Game.getState(3, 4)).toBe('Gray');
+        expect(Game.getState(5, 4)).toBe('White');
+        expect(Game.getNeighborStates(3, 4)).toEqual(['White', 'White', 'Gray', 'Black', 'Open', 'Gray']);
     });
 
     test('canRemove', () => {
