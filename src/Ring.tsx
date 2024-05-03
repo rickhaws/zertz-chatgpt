@@ -2,9 +2,11 @@ import React from 'react';
 
 interface RingProps {
     id: string | number;
+    key?: string;
     centerX: number;
     centerY: number;
     isVisible: boolean;
+    onClick?: () => void;
 }
 
 const Ring: React.FC<RingProps> = (props: RingProps) => {
@@ -16,13 +18,15 @@ const Ring: React.FC<RingProps> = (props: RingProps) => {
     <circle
         className={`ring ${props.isVisible ? 'visible' : 'hidden'}`}
         id={props.id.toString()}
+        key={props.id.toString()}
         cx={props.centerX}
         cy={props.centerY}
         r={circleRadius}
         stroke={ringColor}
-        stroke-opacity={props.isVisible ? 1 : 0}
+        strokeOpacity={props.isVisible ? 1 : 0}
         strokeWidth={ringThickness}
-        fill-opacity={0}
+        fillOpacity={0}
+        onClick={props.onClick}
 />)
 };
 

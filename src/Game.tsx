@@ -6,6 +6,8 @@ export const BOARD_SIZE = 7;
 
 const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
 
+export const getBoardState = () => board.map(row => row.slice());
+
 /**
  * Convenience class to simplify working with neighbors
  */
