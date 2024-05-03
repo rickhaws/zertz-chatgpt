@@ -97,7 +97,7 @@ const Board: React.FC<BoardProps> = () => {
         const row = Math.ceil(Math.random() * Game.BOARD_SIZE);
         const col = Math.ceil(Math.random() * Game.BOARD_SIZE);
         Game.setState(state, row, col);
-        /* */ console.log(`Set (${row}, ${col}) to "${state} (occupied=${Game.isOccupied(row, col)})"`);
+        // /* */ console.log(`Set (${row}, ${col}) to "${state} (occupied=${Game.isOccupied(row, col)})"`);
         drawBoard();
     }, [seconds]);
 
