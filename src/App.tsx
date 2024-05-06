@@ -1,14 +1,14 @@
 import React from 'react';
 import './App.css';
 import Board from './Board';
-import PlayerInfo from './PlayerInfo';
+import Player from './PlayerInfo';
 
 const App: React.FC = () => {
   return (
     <div className="app">
-      <PlayerInfo playerId={1} />
+      <Player playerId={1} />
       <Board />
-      <PlayerInfo playerId={2} />
+      <Player playerId={2} />
     </div>
   );
 };

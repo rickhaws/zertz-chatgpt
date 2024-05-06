@@ -1,5 +1,5 @@
 // Board.tsx
-import React, { MouseEventHandler, ReactElement, ReactSVGElement, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Ring from './Ring';
 import Ball from './Ball';
 import * as Game from './Game';
