@@ -1,5 +1,5 @@
 // Board.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { MouseEventHandler, ReactElement, ReactSVGElement, useEffect, useMemo, useState } from 'react';
 import Ring from './Ring';
 import Ball from './Ball';
 import * as Game from './Game';
@@ -9,8 +9,9 @@ interface BoardProps { }
 const Board: React.FC<BoardProps> = () => {
     // ------------------------ BOARD DEFINITION CONSTANTS --------------------
     const ballCounts = [6, 8, 10];
-    const ballColors = ["ivory", "gray", "gunmetalgray"]
+    const ballColors = ['ivory', 'gray', 'gunmetalgray']
     const ringRadius = 50;
+    const ballRadius = 35;
     const [rings, setRings] = useState<JSX.Element[]>([]);
     const [balls, setBalls] = useState<JSX.Element[]>([]);
     const [indexA, setA] = useState(0);
@@ -18,8 +19,8 @@ const Board: React.FC<BoardProps> = () => {
     const [indexC, setC] = useState(2);
     const [seconds, setSeconds] = useState(0);
 
-    const handleClick = (id: number) => {
-        console.log(`circle ${id} was clicked`);
+    const handleClick = (row: number, col: number) => {
+        console.log(`Space (${row}, ${col}) was clicked`);
     };
 
     const getBallColor = (state: Game.SpaceState) => {
@@ -55,8 +56,11 @@ const Board: React.FC<BoardProps> = () => {
                         key={`ring-${row}-${col}`}
                         centerX={x}
                         centerY={y}
-                        isVisible={Game.getState(row, col) !== "Removed"}
-                        // onClick={handleClick}
+                        radius={ringRadius}
+                        row={row}
+                        col={col}
+                        isVisible={Game.getState(row, col) !== 'Removed'}
+                        onClick={handleClick}
                     />
                 ballCollector[i] = 
                     <Ball
@@ -64,8 +68,12 @@ const Board: React.FC<BoardProps> = () => {
                         key={`ball-${row}-${col}`}
                         centerX={x}
                         centerY={y}
+                        radius={ballRadius}
+                        row={row}
+                        col={col}
                         color={getBallColor(Game.getState(row, col))}
                         isVisible={Game.isOccupied(row, col)}
+                        onClick={handleClick}
                     />
                 i++;
             }
@@ -92,12 +100,11 @@ const Board: React.FC<BoardProps> = () => {
         setA(i => i + 1);
         setB(i => i + 1);
         setC(i => i + 1);
-        const states: Game.SpaceState[] = ["Black", "White", "Gray", "Open", "Removed"];
+        const states: Game.SpaceState[] = ['Black', 'White', 'Gray', 'Open', 'Removed'];
         const state = states[seconds % states.length];
         const row = Math.ceil(Math.random() * Game.BOARD_SIZE);
         const col = Math.ceil(Math.random() * Game.BOARD_SIZE);
         Game.setState(state, row, col);
-        // /* */ console.log(`Set (${row}, ${col}) to "${state} (occupied=${Game.isOccupied(row, col)})"`);
         drawBoard();
     }, [seconds]);
 
@@ -110,14 +117,40 @@ const Board: React.FC<BoardProps> = () => {
             <tbody>
                 <tr>
                     <td>
-                        <svg id="board" width="700" height="700">
+                        <svg id='board' width='700' height='700'>
+                            {/* <defs>
+                                <radialGradient id='White'
+                                    cx={.5} cy={.5} r={ballRadius}
+                                    fx={.25} fy={.25}
+                                >
+                                    <stop offset='0%' stop-color='white' />
+                                    <stop offset='90%' stop-color={ballColors[0]} />
+                                    <stop offset='100%' stop-color='white' />
+                                </radialGradient>
+                                <radialGradient id='Gray'
+                                    cx={.5} cy={.5} r={ballRadius}
+                                    fx={.25} fy={.25}
+                                >
+                                    <stop offset='0%' stop-color='white' />
+                                    <stop offset='90%' stop-color={ballColors[1]} />
+                                    <stop offset='100%' stop-color='white' />
+                                </radialGradient>
+                                <radialGradient id='Black'
+                                    cx={.5} cy={.5} r={ballRadius}
+                                    fx={.25} fy={.25}
+                                >
+                                    <stop offset='0%' stop-color='white' />
+                                    <stop offset='90%' stop-color={ballColors[2]} />
+                                    <stop offset='100%' stop-color='white' />
+                                </radialGradient>
+                            </defs> */}
                             {rings}
                             {balls}
                             Sorry, your browser does not support inline SVG.
                         </svg>
                     </td>
                     <td>
-                        <div id="output"></div>
+                        <div id='output'></div>
                     </td>
                 </tr>
             </tbody>
