@@ -168,6 +168,8 @@ describe('Game state tests', () => {
         expect(Game.getState(8, 6)).toBe('Removed');
         expect(Game.getState(8, 7)).toBe('Removed');
         expect(Game.getState(8, 8)).toBe('Removed');
+
+        expect(Game.getGameState()).toEqual({turn: 1, stage: "placeOrJump", player1: {white: 0, gray: 0, black: 0}, player2: {white: 0, gray: 0, black: 0}})
     });
     test('setState', () => {
         setup();
@@ -214,45 +216,6 @@ describe('Game state tests', () => {
         }
     });
 
-    test('getJumps', () => {
-        setup();
-        Game.setState('White', 2, 4);
-        Game.setState('White', 2, 5);
-        Game.setState('White', 2, 6);
-
-        Game.setState('Black', 4, 1);
-        Game.setState('Black', 4, 4);
-        Game.setState('Black', 4, 7);
-
-        Game.setState('Gray', 6, 4);
-        Game.setState('Gray', 6, 5);
-
-        //  \0\1\2\3\4\5\6\7\8\
-        // 0 \ \ \ \ \ \ \ \ \ \
-        // 1  \ \ \ \ \B\B\B\B\ \
-        // 2   \ \ \ \O\W\W\W\O\ \
-        // 3    \ \ \G\G\G\G\G\G\ \
-        // 4     \ \B\O\O\B\O\O\B\ \
-        // 5      \ \W\W\W\W\W\W\ \ \
-        // 6       \ \O\O\O\G\G\ \ \ \
-        // 7        \ \ \ \ \ \ \ \ \ \
-        // 8         \ \ \ \ \ \ \ \ \ \
-
-        const actual = Game.getJumps();
-        const expected = [
-            [false, false, false, false, false, false, false, false, false], // 0
-            [false, false, false, false, false, false, false, false, false], // 1
-            [false, false, false, false, true,  true,  true,  false, false], // 2
-            [false, false, false, false, false, false, false, false, false], // 3
-            [false, true,  false, false, true,  false, false, true,  false], // 4
-            [false, false, false, false, false, false, false, false, false], // 5
-            [false, false, false, false, true,  true,  false, false, false], // 6
-            [false, false, false, false, false, false, false, false, false], // 7
-            [false, false, false, false, false, false, false, false, false], // 8
-        ]
-        expect(actual).toEqual(expected);
-    });
-
     test('canJump', () => {
         setup();
         Game.setState('White', 2, 4);
@@ -291,6 +254,45 @@ describe('Game state tests', () => {
         expect(Game.canJump(2, 5, Game.Direction.W)).toBeTruthy();
         expect(Game.canJump(2, 3, Game.Direction.W)).toBeFalsy(); // Space unoccupied
         expect(Game.canJump(2, 2, Game.Direction.W)).toBeFalsy(); // Space removed
+    });
+
+    test('getJumps', () => {
+        setup();
+        Game.setState('White', 2, 4);
+        Game.setState('White', 2, 5);
+        Game.setState('White', 2, 6);
+
+        Game.setState('Black', 4, 1);
+        Game.setState('Black', 4, 4);
+        Game.setState('Black', 4, 7);
+
+        Game.setState('Gray', 6, 4);
+        Game.setState('Gray', 6, 5);
+
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\W\W\W\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \B\O\O\B\O\O\B\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\G\G\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        const actual = Game.getJumps();
+        const expected = [
+            [false, false, false, false, false, false, false, false, false], // 0
+            [false, false, false, false, false, false, false, false, false], // 1
+            [false, false, false, false, true,  true,  true,  false, false], // 2
+            [false, false, false, false, false, false, false, false, false], // 3
+            [false, true,  false, false, true,  false, false, true,  false], // 4
+            [false, false, false, false, false, false, false, false, false], // 5
+            [false, false, false, false, true,  true,  false, false, false], // 6
+            [false, false, false, false, false, false, false, false, false], // 7
+            [false, false, false, false, false, false, false, false, false], // 8
+        ]
+        expect(actual).toEqual(expected);
     });
 
     test('jump success', () => {
@@ -450,6 +452,35 @@ describe('Game state tests', () => {
         expect(Game.canRemove(7, 7)).toBeFalsy();
     });
 
+    test('getRemovables',() => {
+        setup();
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\O\O\O\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \O\O\O\O\O\O\O\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        const actual = Game.getRemovables();
+        const expected = [
+            // 0     1      2       3       4    5      6       7       8
+            [false, false, false, false, false, false, false, false, false], // 0
+            [false, false, false, false, false, false, false, false, false], // 1
+            [false, false, false,  true, false, false, false,  true, false], // 2
+            [false, false, false, false, false, false, false, false, false], // 3
+            [false, false,  true, false, false, false, false,  true, false], // 4
+            [false, false, false, false, false, false, false, false, false], // 5
+            [false,  true,  true,  true,  true,  true,  true, false, false], // 6
+            [false, false, false, false, false, false, false, false, false], // 7
+            [false, false, false, false, false, false, false, false, false], // 8
+        ]
+        expect(actual).toEqual(expected);
+    });
+
     test('Removed can\'t be changed', () => {
         setup();
         //  \0\1\2\3\4\5\6\7\8\
@@ -531,7 +562,12 @@ describe('Game state tests', () => {
 5     \\ \\O\\O\\O\\O\\O\\O\\ \\ \\
 6      \\ \\O\\O\\O\\O\\O\\ \\ \\ \\
 7       \\ \\O\\O\\O\\O\\ \\ \\ \\ \\
-8        \\ \\ \\ \\ \\ \\ \\ \\ \\ \\`;
+8        \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
+
+Player 1: 0 white, 0 gray, 0 black
+Player 2: 0 white, 0 gray, 0 black
+
+Player 1's turn to place a ball or jump`;
 
         expect(Game.toString()).toEqual(expected);
     });

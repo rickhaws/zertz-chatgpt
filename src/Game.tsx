@@ -2,9 +2,12 @@ import { dir } from 'console';
 
 export type SpaceState = 'Removed' | 'Open' | 'White' | 'Gray' | 'Black';
 
+
 export const BOARD_SIZE = 7;
 
 const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
+
+export const getGameState = () => ({turn: 1, stage: "placeOrJump", player1: {white: 0, gray: 0, black: 0}, player2: {white: 0, gray: 0, black: 0}});
 
 export const getBoardState = () => board.map(row => row.slice());
 
@@ -214,5 +217,13 @@ export const toString = () => {
             output += symbols[getState(i, j)] + '\\';
         }
     }
+
+    output += `
+
+Player 1: 0 white, 0 gray, 0 black
+Player 2: 0 white, 0 gray, 0 black
+
+Player 1's turn to place a ball or jump`;
+
     return output;
 };
