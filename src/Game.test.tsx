@@ -472,9 +472,9 @@ describe('Game state tests', () => {
             [false, false, false, false, false, false, false, false, false], // 1
             [false, false, false,  true, false, false, false,  true, false], // 2
             [false, false, false, false, false, false, false, false, false], // 3
-            [false, false,  true, false, false, false, false,  true, false], // 4
+            [false,  true, false, false, false, false, false,  true, false], // 4
             [false, false, false, false, false, false, false, false, false], // 5
-            [false,  true,  true,  true,  true,  true,  true, false, false], // 6
+            [false,  true,  true,  true,  true,  true, false, false, false], // 6
             [false, false, false, false, false, false, false, false, false], // 7
             [false, false, false, false, false, false, false, false, false], // 8
         ]

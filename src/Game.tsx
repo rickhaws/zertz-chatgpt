@@ -187,6 +187,17 @@ export const getJumps = () => {
     return jumps;
 };
 
+export const getRemovables = () => {
+    let removables: boolean[][] = Array(BOARD_SIZE + 2).fill(0).map(_ => Array(BOARD_SIZE + 2).fill(false));
+
+    for (let row = 0; row < removables.length; row++) {
+        for (let col = 0; col < removables[row].length; col++) {
+            removables[row][col] = canRemove(row, col);
+        }
+    }
+    return removables;
+}
+
 export const jump = (row: number, col: number, direction: Coordinate) => {
     if (!canJump(row, col, direction)) {
         return '';
