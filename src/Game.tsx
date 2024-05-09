@@ -1,13 +1,19 @@
 import { dir } from 'console';
 
-export type SpaceState = 'Removed' | 'Open' | 'White' | 'Gray' | 'Black';
+export type BallColor = 'White' | 'Gray' | 'Black';
+export type SpaceState = BallColor | 'Removed' | 'Open';
+export type TurnStage = 'SelectForPlacement' | 'SelectJump' | 'SelectPlacement';
+export type ballCollection = { ['White']: number, ['Gray']: number, ['Black']: number };
 
+const ballPool: ballCollection = { ['White']: 6, ['Gray']: 8, ['Black']: 10 }; // **TODO**: Check these numbers
+const player1: ballCollection = { ['White']: 0, ['Gray']: 0, ['Black']: 0 };
+const player2: ballCollection = { ['White']: 0, ['Gray']: 0, ['Black']: 0 };
 
 export const BOARD_SIZE = 7;
 
 const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
 
-export const getGameState = () => ({turn: 1, stage: "placeOrJump", player1: {white: 0, gray: 0, black: 0}, player2: {white: 0, gray: 0, black: 0}});
+export const getGameState = () => ({turn: 1, stage: 'placeOrJump', player1: {white: 0, gray: 0, black: 0}, player2: {white: 0, gray: 0, black: 0}});
 
 export const getBoardState = () => board.map(row => row.slice());
 
