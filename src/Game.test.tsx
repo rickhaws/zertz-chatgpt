@@ -295,6 +295,33 @@ describe('Game state tests', () => {
         expect(actual).toEqual(expected);
     });
 
+    test('hasJumps', () => {
+        setup();
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\O\O\O\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \O\O\O\O\O\O\O\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        for (let row = 1; row <= Game.BOARD_SIZE; row++) {
+            for (let col = 1; col <= Game.BOARD_SIZE; col++) {
+                for (let dir of Game.Directions) {
+                    if (Game.canJump(row, col, dir) ) {
+                        expect(Game.hasJumps()).toBeTruthy();
+                        Game.jump(row, col, dir);
+                    }
+                }
+            }
+        }
+        expect(Game.hasJumps()).toBeFalsy();
+    });
+
+
     test('jump success', () => {
         setup();
         Game.setState('White', 2, 4);

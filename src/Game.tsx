@@ -1,13 +1,15 @@
 import { dir } from 'console';
 
-export type BallColor = 'White' | 'Gray' | 'Black';
+const ballColors = ['White', 'Gray', 'Black'];
+export type BallColor = typeof ballColors[number];
+const isBallColor = (maybeColor: SpaceState): maybeColor is BallColor => ballColors.includes(maybeColor);
 export type SpaceState = BallColor | 'Removed' | 'Open';
-export type TurnStage = 'SelectForPlacement' | 'SelectJump' | 'SelectPlacement';
-export type ballCollection = { ['White']: number, ['Gray']: number, ['Black']: number };
+export type TurnStage = 'SelectForPlacement' | 'SelectJump' | 'SelectPlacement' | 'Jumping';
+export type ballCollection = { [key: BallColor]: number };
 
-const ballPool: ballCollection = { ['White']: 6, ['Gray']: 8, ['Black']: 10 }; // **TODO**: Check these numbers
-const player1: ballCollection = { ['White']: 0, ['Gray']: 0, ['Black']: 0 };
-const player2: ballCollection = { ['White']: 0, ['Gray']: 0, ['Black']: 0 };
+const ballPool: ballCollection = { White: 6, Gray: 8, Black: 10 }; // **TODO**: Check these numbers
+const player1: ballCollection = { White: 0, Gray: 0, Black: 0 };
+const player2: ballCollection = { White: 0, Gray: 0, Black: 0 };
 
 export const BOARD_SIZE = 7;
 
@@ -62,6 +64,8 @@ export const Direction = {
     W: Coordinate.W,
 };
 
+export const Directions = [...Coordinate.directions];
+
 // Representation of Zertz board.
 // Note that rows 0 & 8 and columns 0 & 8
 //    are empty so that all cells in 1-7
@@ -95,8 +99,8 @@ export const initBoard = () => {
     }
 };
 
-export const getState = (row: number, col: number) => {
-    return board[row][col!];
+export const getState = (row: number, col: number): SpaceState => {
+    return board[row][col];
 }
 
 // List neighbor cells in circular fashion, beginning at upper-left.
@@ -122,11 +126,7 @@ export const canRemove = (row: number, col: number) =>
     return false;
 };
 
-export const isOccupied = (row: number, col: number) => {
-    return (getState(row, col) === 'White' ||
-            getState(row, col) === 'Gray' ||
-            getState(row, col) === 'Black');
-};
+export const isOccupied = (row: number, col: number) => isBallColor(getState(row, col));
 
 export const isChangeAllowed = (row: number, col: number, newState: SpaceState) => {
     let allowed = false;
@@ -179,11 +179,6 @@ export const getJumps = () => {
     
     for (let i = 0; i < jumps.length; i++) {
         for (let j = 0; j < jumps[i].length; j++) {
-
-            if (!isOccupied(i,j)) { // 'false' for unoccupied rings
-                continue;
-            } 
-
             for (let direction of Coordinate.directions) {
                 if (canJump(i, j, direction)) {
                     jumps[i][j] = true;
@@ -194,6 +189,19 @@ export const getJumps = () => {
     }
     return jumps;
 };
+
+export const hasJumps = () => {
+    for (let i = 0; i < BOARD_SIZE; i++) {
+        for (let j = 0; j < board[i].length; j++) {
+            for (let direction of Coordinate.directions) {
+                if (canJump(i, j, direction)) {
+                    return (true);
+                }
+            }
+        }
+    }
+    return false;
+}
 
 export const getRemovables = () => {
     let removables: boolean[][] = Array(BOARD_SIZE + 2).fill(0).map(_ => Array(BOARD_SIZE + 2).fill(false));
@@ -233,7 +241,7 @@ export const jump = (row: number, col: number, direction: Coordinate) => {
 }
 
 export const toString = () => {
-    const symbols = {
+    const symbols: { [key: SpaceState]: string} = {
         'Removed': ' ',
         'Open': 'O',
         'White': 'W',
