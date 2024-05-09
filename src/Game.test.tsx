@@ -481,6 +481,181 @@ describe('Game state tests', () => {
         expect(actual).toEqual(expected);
     });
 
+    test('removeRing', () => {
+        setup();
+        Game.setState('Removed', 4, 1);
+        Game.setState('Removed', 6, 1);
+        Game.setState('Removed', 6, 2);
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\O\O\O\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \ \O\O\O\O\O\O\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \ \ \O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        let expected = Game.getState(1, 1);
+        expect(Game.removeRing(1, 1)).toBeFalsy();
+        expect(Game.getState(1, 1)).toEqual(expected);
+
+        expected = Game.getState(1, 2);
+        expect(Game.removeRing(1, 2)).toBeFalsy();
+        expect(Game.getState(1, 2)).toEqual(expected);
+
+        expected = Game.getState(1, 3);
+        expect(Game.removeRing(1, 3)).toBeFalsy();
+        expect(Game.getState(1, 3)).toEqual(expected);
+
+        expected = Game.getState(1, 4);
+        expect(Game.removeRing(1, 4)).toBeFalsy();
+        expect(Game.getState(1, 4)).toEqual(expected);
+
+        expected = Game.getState(1, 5);
+        expect(Game.removeRing(1, 5)).toBeFalsy();
+        expect(Game.getState(1, 5)).toEqual(expected);
+
+        expected = Game.getState(1, 6);
+        expect(Game.removeRing(1, 6)).toBeFalsy();
+        expect(Game.getState(1, 6)).toEqual(expected);
+
+        expected = Game.getState(1, 7);
+        expect(Game.removeRing(1, 7)).toBeFalsy();
+        expect(Game.getState(1, 7)).toEqual(expected);
+
+        expected = Game.getState(2, 1);
+        expect(Game.removeRing(2, 1)).toBeFalsy();
+        expect(Game.getState(2, 1)).toEqual(expected);
+
+        expected = Game.getState(2, 2);
+        expect(Game.removeRing(2, 2)).toBeFalsy();
+        expect(Game.getState(2, 2)).toEqual(expected);
+
+        expect(Game.removeRing(2, 3)).toBeTruthy();
+        expect(Game.getState(2, 3)).toEqual("Removed");
+
+        expected = Game.getState(2, 4);
+        expect(Game.removeRing(2, 4)).toBeFalsy();
+        expect(Game.getState(2, 4)).toEqual(expected);
+
+        expected = Game.getState(2, 5);
+        expect(Game.removeRing(2, 5)).toBeFalsy();
+        expect(Game.getState(2, 5)).toEqual(expected);
+
+        expected = Game.getState(2, 6);
+        expect(Game.removeRing(2, 6)).toBeFalsy();
+        expect(Game.getState(2, 6)).toEqual(expected);
+
+        expect(Game.removeRing(2, 7)).toBeTruthy();
+        expect(Game.getState(2, 7)).toEqual("Removed");
+
+        expected = Game.getState(4, 1);
+        expect(Game.removeRing(4, 1)).toBeFalsy();
+        expect(Game.getState(4, 1)).toEqual(expected);
+
+        expected = Game.getState(4, 2);
+        expect(Game.removeRing(4, 2)).toBeFalsy();
+        expect(Game.getState(4, 2)).toEqual(expected);
+
+        expected = Game.getState(4, 3);
+        expect(Game.removeRing(4, 3)).toBeFalsy();
+        expect(Game.getState(4, 3)).toEqual(expected);
+
+        expected = Game.getState(4, 4);
+        expect(Game.removeRing(4, 4)).toBeFalsy();
+        expect(Game.getState(4, 4)).toEqual(expected);
+
+        expected = Game.getState(4, 5);
+        expect(Game.removeRing(4, 5)).toBeFalsy();
+        expect(Game.getState(4, 5)).toEqual(expected);
+
+        expected = Game.getState(4, 6);
+        expect(Game.removeRing(4, 6)).toBeFalsy();
+        expect(Game.getState(4, 6)).toEqual(expected);
+
+        expect(Game.removeRing(4, 7)).toBeTruthy();
+        expect(Game.getState(4, 7)).toEqual("Removed");
+
+        expected = Game.getState(6, 1);
+        expect(Game.removeRing(6, 1)).toBeFalsy();
+        expect(Game.getState(6, 1)).toEqual(expected);
+
+        expected = Game.getState(6, 2);
+        expect(Game.removeRing(6, 2)).toBeFalsy();
+        expect(Game.getState(6, 2)).toEqual(expected);
+
+        expect(Game.removeRing(6, 3)).toBeTruthy();
+        expect(Game.getState(6, 3)).toEqual("Removed");
+
+        expect(Game.removeRing(6, 4)).toBeTruthy();
+        expect(Game.getState(6, 4)).toEqual("Removed");
+
+        expect(Game.removeRing(6, 5)).toBeTruthy();
+        expect(Game.getState(6, 5)).toEqual("Removed");
+
+        expected = Game.getState(6, 6);
+        expect(Game.removeRing(6, 6)).toBeFalsy();
+        expect(Game.getState(6, 6)).toEqual(expected);
+
+        expected = Game.getState(6, 7);
+        expect(Game.removeRing(6, 7)).toBeFalsy();
+        expect(Game.getState(6, 7)).toEqual(expected);
+
+        expected = Game.getState(7, 1);
+        expect(Game.removeRing(7, 1)).toBeFalsy();
+        expect(Game.getState(7, 1)).toEqual(expected);
+
+        expected = Game.getState(7, 2);
+        expect(Game.removeRing(7, 2)).toBeFalsy();
+        expect(Game.getState(7, 2)).toEqual(expected);
+
+        expected = Game.getState(7, 3);
+        expect(Game.removeRing(7, 3)).toBeFalsy();
+        expect(Game.getState(7, 3)).toEqual(expected);
+
+        expected = Game.getState(7, 4);
+        expect(Game.removeRing(7, 4)).toBeFalsy();
+        expect(Game.getState(7, 4)).toEqual(expected);
+
+        expected = Game.getState(7, 5);
+        expect(Game.removeRing(7, 5)).toBeFalsy();
+        expect(Game.getState(7, 5)).toEqual(expected);
+
+        expected = Game.getState(7, 6);
+        expect(Game.removeRing(7, 6)).toBeFalsy();
+        expect(Game.getState(7, 6)).toEqual(expected);
+
+        expected = Game.getState(7, 7);
+        expect(Game.removeRing(7, 7)).toBeFalsy();
+        expect(Game.getState(7, 7)).toEqual(expected);
+    });
+
+    test('hasRemovableRings', () => {
+        setup();
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\O\O\O\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \O\O\O\O\O\O\O\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        for (let row = 1; row <= Game.BOARD_SIZE; row++) {
+            for (let col = 1; col <= Game.BOARD_SIZE; col++) {
+                if (Game.canRemove(row, col) ) {
+                    expect(Game.hasRemovableRings()).toBeTruthy();
+                    Game.removeRing(row, col);
+                }
+            }
+        }
+        expect(Game.hasRemovableRings()).toBeFalsy();
+    });
+
     test('Removed can\'t be changed', () => {
         setup();
         //  \0\1\2\3\4\5\6\7\8\

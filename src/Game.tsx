@@ -159,6 +159,8 @@ export const setState = (newState: SpaceState, rowOrCoordinate: number | Coordin
     }
 };
 
+export const removeRing = (row: number, col: number) => setState("Removed", row, col);
+
 export const canJump = (row: number, col: number, direction: Coordinate): boolean => {
     const cell = coord(row, col);
     const neighbor = cell.getNeighbor(direction);
@@ -202,6 +204,17 @@ export const getRemovables = () => {
         }
     }
     return removables;
+}
+
+export const hasRemovableRings = () => {
+    for (let row = 0; row < BOARD_SIZE; row++) {
+        for (let col = 0; col < board[row].length; col++) {
+            if(canRemove(row, col)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 export const jump = (row: number, col: number, direction: Coordinate) => {
