@@ -1,21 +1,32 @@
-import { dir } from 'console';
-
 const ballColors = ['White', 'Gray', 'Black'];
 export type BallColor = typeof ballColors[number];
 const isBallColor = (maybeColor: SpaceState): maybeColor is BallColor => ballColors.includes(maybeColor);
 export type SpaceState = BallColor | 'Removed' | 'Open';
-export type TurnStage = 'SelectForPlacement' | 'SelectJump' | 'SelectPlacement' | 'Jumping';
+
+const stages = [
+     'SelectBallForPlacement',
+    'SelectJump',
+    'SelectPlacement',
+    'RemoveRing',
+    'PlaceFirstJump',
+    'CompleteJumpOrPlaceNextJump',
+];
+export type TurnStage = typeof stages[number];
+const isStage = (maybeStage: string): maybeStage is TurnStage => stages.includes(maybeStage);
 export type ballCollection = { [key: BallColor]: number };
 
 const ballPool: ballCollection = { White: 6, Gray: 8, Black: 10 }; // **TODO**: Check these numbers
 const player1Balls: ballCollection = { White: 0, Gray: 0, Black: 0 };
 const player2Balls: ballCollection = { White: 0, Gray: 0, Black: 0 };
+let playerTurn = 1;
+let turnStage: TurnStage = 'SelectBallForPlacement';
+let winner = 0;
 
 export const BOARD_SIZE = 7;
 
 const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
 
-export const getGameState = () => ({turn: 1, stage: 'placeOrJump', player1: {white: 0, gray: 0, black: 0}, player2: {white: 0, gray: 0, black: 0}});
+export const getGameState = () => ({ playerTurn, turnStage, player1Balls, player2Balls, ballPool, winner });
 
 export const getBoardState = () => board.map(row => row.slice());
 
@@ -241,13 +252,21 @@ export const jump = (row: number, col: number, direction: Coordinate) => {
 }
 
 export const toString = () => {
-    const symbols: { [key: SpaceState]: string} = {
+    const symbols: { [key: SpaceState]: string } = {
         'Removed': ' ',
         'Open': 'O',
         'White': 'W',
         'Black': 'B',
         'Gray': 'G',
-    }
+    };
+    const stages: { [key: TurnStage]: string } = {
+        'SelectBallForPlacement': 'select a ball to place',
+        'SelectPlacement': 'place the selected ball',
+        'SelectJump': 'select a ball to jump',
+        'RemoveRing': 'select a ring to remove',
+        'PlaceFirstJump': 'select destination for the current jump',
+        'CompleteJumpOrPlaceNextJump': 'continue or complete a jump in progress',
+    };
     let output = '\\0\\1\\2\\3\\4\\5\\6\\7\\8\\';
     for (let i = 0; i < BOARD_SIZE + 2; i++) {
         output += '\n' + i +' '.repeat(i) + '\\';
@@ -258,10 +277,10 @@ export const toString = () => {
 
     output += `
 
-Player 1: 0 white, 0 gray, 0 black
-Player 2: 0 white, 0 gray, 0 black
+Player 1: ${player1Balls}
+Player 2: ${player2Balls}
 
-Player 1's turn to place a ball or jump`;
+Player ${playerTurn}'s turn to: ${[turnStage]}`;
 
     return output;
 };

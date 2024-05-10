@@ -753,7 +753,16 @@ describe('Game state tests', () => {
     });
 
     test('toString', () => {
-        Game.initBoard();
+        const stages: { [key: Game.TurnStage]: string} = {
+            ['SelectBallForPlacement']: 'select a ball to place',
+            ['SelectPlacement']: 'place the selected ball',
+            ['SelectJump']: 'select a ball to jump',
+            ['RemoveRing']: 'select a ring to remove',
+            ['PlaceFirstJump']: 'select destination for the current jump',
+            ['CompleteJumpOrPlaceNextJump']: 'continue or complete a jump in progress',
+        };
+
+    Game.initBoard();
         const expected = 
 `\\0\\1\\2\\3\\4\\5\\6\\7\\8\\
 0\\ \\ \\ \\ \\ \\ \\ \\ \\ \\
@@ -766,10 +775,11 @@ describe('Game state tests', () => {
 7       \\ \\O\\O\\O\\O\\ \\ \\ \\ \\
 8        \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
 
+Ball pool: 6 white, 8 gray, 10 black
 Player 1: 0 white, 0 gray, 0 black
 Player 2: 0 white, 0 gray, 0 black
 
-Player 1's turn to place a ball or jump`;
+Player 1's turn to ${stages['SelectBallForPlacement']}`;
 
         expect(Game.toString()).toEqual(expected);
     });
