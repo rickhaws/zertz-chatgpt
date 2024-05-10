@@ -8,8 +8,8 @@ export type TurnStage = 'SelectForPlacement' | 'SelectJump' | 'SelectPlacement' 
 export type ballCollection = { [key: BallColor]: number };
 
 const ballPool: ballCollection = { White: 6, Gray: 8, Black: 10 }; // **TODO**: Check these numbers
-const player1: ballCollection = { White: 0, Gray: 0, Black: 0 };
-const player2: ballCollection = { White: 0, Gray: 0, Black: 0 };
+const player1Balls: ballCollection = { White: 0, Gray: 0, Black: 0 };
+const player2Balls: ballCollection = { White: 0, Gray: 0, Black: 0 };
 
 export const BOARD_SIZE = 7;
 
