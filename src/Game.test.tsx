@@ -894,6 +894,10 @@ describe('Game state tests', () => {
         // No ball selected for placement
         expect(() => Game.placeBall(2, 3)).toThrow();
 
+        expect(Game.getGameState().ballPool['White']).toEqual(6);
+        expect(Game.getGameState().ballPool['Gray']).toEqual(8);
+        expect(Game.getGameState().ballPool['Black']).toEqual(10);
+
         Game.selectBallFromPool('Black');
         expect(Game.getGameState().turnStage).toEqual('SelectPlacement' as Game.TurnStage)
         expect(() => Game.placeBall(2, 3)).not.toThrow();
@@ -913,7 +917,7 @@ describe('Game state tests', () => {
 
         Game.setGameState(state);
         expect(() => Game.placeBall(2, 4)).toThrow();
-        expect(Game.getGameState().ballPool['White']).toEqual(6);
+        expect(Game.getGameState().ballPool['White']).toEqual(0);
         expect(Game.getGameState().ballSelectedForPlacement).toEqual('White');
     });
 
