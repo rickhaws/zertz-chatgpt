@@ -2,9 +2,18 @@ const ballColors = ['White', 'Gray', 'Black'];
 export type BallColor = typeof ballColors[number];
 const isBallColor = (maybeColor: SpaceState): maybeColor is BallColor => ballColors.includes(maybeColor);
 export type SpaceState = BallColor | 'Removed' | 'Open';
+export type GameState = {
+    ballPool: BallCollection;
+    player1Balls: BallCollection;
+    player2Balls: BallCollection;
+    playerTurn: number;
+    turnStage: TurnStage;
+    ballSelectedForPlacement: BallColor | null;
+    winner: number;
+};
 
 const stages = [
-     'SelectBallForPlacement',
+    'SelectBallForPlacement',
     'SelectJump',
     'SelectPlacement',
     'RemoveRing',
@@ -13,20 +22,29 @@ const stages = [
 ];
 export type TurnStage = typeof stages[number];
 const isStage = (maybeStage: string): maybeStage is TurnStage => stages.includes(maybeStage);
-export type ballCollection = { [key: BallColor]: number };
+export type BallCollection = { [key: BallColor]: number };
 
-const ballPool: ballCollection = { White: 6, Gray: 8, Black: 10 }; // **TODO**: Check these numbers
-const player1Balls: ballCollection = { White: 0, Gray: 0, Black: 0 };
-const player2Balls: ballCollection = { White: 0, Gray: 0, Black: 0 };
-let playerTurn = 1;
-let turnStage: TurnStage = 'SelectBallForPlacement';
-let winner = 0;
+const initialGameState: GameState = {
+    ballPool: { White: 6, Gray: 8, Black: 10 }, // **TODO**: Check these numbers
+    player1Balls: { White: 0, Gray: 0, Black: 0 } as BallCollection,
+    player2Balls: { White: 0, Gray: 0, Black: 0 } as BallCollection,
+    playerTurn: 1,
+    turnStage: 'SelectBallForPlacement' as TurnStage,
+    ballSelectedForPlacement: null as BallColor | null,
+    winner: 0,
+}
+
+let gameState = initialGameState;
 
 export const BOARD_SIZE = 7;
 
 const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
 
-export const getGameState = () => ({ playerTurn, turnStage, player1Balls, player2Balls, ballPool, winner });
+export const getGameState = () => ({...gameState});
+
+export const setGameState = (state: GameState) => {
+    gameState = {...state};
+}
 
 export const getBoardState = () => board.map(row => row.slice());
 
@@ -92,7 +110,7 @@ export const Directions = [...Coordinate.directions];
     // 7        \ \O\O\O\O\ \ \ \ \
     // 8         \ \ \ \ \ \ \ \ \ \
 
-export const initBoard = () => {
+export const init = () => {
     for (let i = 0; i < BOARD_SIZE + 2; i++) {
         for (let j = 0; j < BOARD_SIZE + 2; j++) {
             board[i][j] = 'Removed';
@@ -108,6 +126,8 @@ export const initBoard = () => {
             board[row][j] = 'Open';
         }
     }
+
+    setGameState(initialGameState);
 };
 
 export const getState = (row: number, col: number): SpaceState => {
@@ -172,13 +192,19 @@ export const setState = (newState: SpaceState, rowOrCoordinate: number | Coordin
 
 export const removeRing = (row: number, col: number) => setState("Removed", row, col);
 
-export const canJump = (row: number, col: number, direction: Coordinate): boolean => {
+export const canJump = (row: number, col: number, direction?: Coordinate): boolean => {
     const cell = coord(row, col);
-    const neighbor = cell.getNeighbor(direction);
-    const destination = neighbor.getNeighbor(direction);
-    return (isOccupied(cell.row, cell.column) 
-        && isOccupied(neighbor.row, neighbor.column) 
-        && getState(destination.row, destination.column) === 'Open');
+    const directions = direction ? [direction] : Coordinate.directions;
+    for (let d of directions) {
+        const neighbor = cell.getNeighbor(d);
+        const destination = neighbor.getNeighbor(d);
+        if (isOccupied(cell.row, cell.column) 
+            && isOccupied(neighbor.row, neighbor.column) 
+            && getState(destination.row, destination.column) === 'Open') {
+            return true;
+        }
+    }
+    return false;
 };
 
 export const getJumps = () => {
@@ -201,7 +227,7 @@ export const getJumps = () => {
     return jumps;
 };
 
-export const hasJumps = () => {
+export const jumpsExist = () => {
     for (let i = 0; i < BOARD_SIZE; i++) {
         for (let j = 0; j < board[i].length; j++) {
             for (let direction of Coordinate.directions) {
@@ -225,7 +251,7 @@ export const getRemovables = () => {
     return removables;
 }
 
-export const hasRemovableRings = () => {
+export const removableRingsExist = () => {
     for (let row = 0; row < BOARD_SIZE; row++) {
         for (let col = 0; col < board[row].length; col++) {
             if(canRemove(row, col)) {
@@ -251,6 +277,62 @@ export const jump = (row: number, col: number, direction: Coordinate) => {
     return removedBall;
 }
 
+export const setNextPlayersTurn = () => {
+    gameState.playerTurn = gameState.playerTurn % 2 + 1;  // 1 -> 1 + 1 ; 2 ->  + 1
+    gameState.turnStage = 'SelectBallForPlacement';
+}
+
+export const selectBallFromPool = (color: BallColor) => {
+    try {
+        selectBallFromCollection(gameState.ballPool, color);
+    } catch (e) {
+        throw e + `: ball pool`;
+    }
+}
+
+export const selectBallFromPlayerStash = (color: BallColor) => {
+    const stash = gameState.playerTurn === 1 ? gameState.player1Balls : gameState.player2Balls;
+
+    try {
+        selectBallFromCollection(stash, color);
+    } catch (e) {
+        throw e + `: ball pool`;
+    }
+}
+
+export const selectBallFromCollection = (collection: BallCollection, color: BallColor) => {
+    if (collection[color] <= 0) {
+        throw `No ${color} balls available for selection`;
+    }
+    gameState.turnStage = "SelectPlacement";
+    gameState.ballSelectedForPlacement = color;
+}
+
+export const placeBall = (row: number, col: number) => {
+    if (getState(row, col) !== 'Open') {
+        throw `Attempted to place ball at ${row}, ${col} with non-open state: ${getState(row, col)}`;
+    }
+    if (gameState.ballSelectedForPlacement === null) {
+        throw `Attempted to place a ball when no ball is selected`;
+    }
+
+    let pool = gameState.ballPool;
+    let color = gameState.ballSelectedForPlacement;
+    if (pool[color] <= 0) {
+        pool = gameState.playerTurn === 1 ? gameState.player1Balls : gameState.player2Balls;
+    }
+
+    if (pool[color] <= 0) {
+        throw `Attempted to place a ${color} ball for Player ${gameState.playerTurn} ` +
+            `whose ${color} ball count is ${pool[color]}`;
+    }
+
+    setState(color, row, col);
+    pool[color]--;
+    gameState.ballSelectedForPlacement = null;
+    setNextPlayersTurn();
+}
+
 export const toString = () => {
     const symbols: { [key: SpaceState]: string } = {
         'Removed': ' ',
@@ -259,14 +341,7 @@ export const toString = () => {
         'Black': 'B',
         'Gray': 'G',
     };
-    const stages: { [key: TurnStage]: string } = {
-        'SelectBallForPlacement': 'select a ball to place',
-        'SelectPlacement': 'place the selected ball',
-        'SelectJump': 'select a ball to jump',
-        'RemoveRing': 'select a ring to remove',
-        'PlaceFirstJump': 'select destination for the current jump',
-        'CompleteJumpOrPlaceNextJump': 'continue or complete a jump in progress',
-    };
+
     let output = '\\0\\1\\2\\3\\4\\5\\6\\7\\8\\';
     for (let i = 0; i < BOARD_SIZE + 2; i++) {
         output += '\n' + i +' '.repeat(i) + '\\';
@@ -275,12 +350,8 @@ export const toString = () => {
         }
     }
 
-    output += `
-
-Player 1: ${player1Balls}
-Player 2: ${player2Balls}
-
-Player ${playerTurn}'s turn to: ${[turnStage]}`;
+    output += "\n\n" + JSON.stringify(gameState, null, 2);
 
     return output;
 };
+

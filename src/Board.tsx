@@ -91,7 +91,7 @@ const Board: React.FC<BoardProps> = () => {
     // -------------------------------- TESTS ------------------------------------
     // -------------------------- MAIN --------------------------------------
     useEffect(() => {
-        Game.initBoard();
+        Game.init();
         drawBoard();
         setInterval(() => setSeconds(i => i + 1), 1000);
     }, []);

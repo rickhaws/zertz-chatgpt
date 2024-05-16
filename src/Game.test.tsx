@@ -17,7 +17,7 @@ import * as Game from './Game';
 
 const setup = (() => {
 
-    Game.initBoard();
+    Game.init();
     { // in a block for easy collapsing in editor
         Game.setState('Black', 1, 4);
         Game.setState('Black', 1, 5);
@@ -77,8 +77,8 @@ const setup = (() => {
 });
 
 describe('Game state tests', () => {
-    test('initBoard and getState', () => {
-        Game.initBoard();
+    test('init and getState', () => {
+        Game.init();
         expect(Game.getState(0, 0)).toBe('Removed');
         expect(Game.getState(0, 1)).toBe('Removed');
         expect(Game.getState(0, 2)).toBe('Removed');
@@ -169,7 +169,30 @@ describe('Game state tests', () => {
         expect(Game.getState(8, 7)).toBe('Removed');
         expect(Game.getState(8, 8)).toBe('Removed');
 
-        expect(Game.getGameState()).toEqual({turn: 1, stage: "placeOrJump", player1: {white: 0, gray: 0, black: 0}, player2: {white: 0, gray: 0, black: 0}})
+        expect(Game.getGameState()).toEqual({
+            playerTurn: 1, 
+            turnStage: "SelectBallForPlacement", 
+            ballPool: {"White": 6, "Gray": 8, "Black": 10},
+            player1Balls: {"White": 0, "Gray": 0, "Black": 0}, 
+            player2Balls: {"White": 0, "Gray": 0, "Black": 0},
+            ballSelectedForPlacement: null,
+            winner: 0,
+        } as Game.GameState)
+    });
+    test('setGameState', () => {
+        const expected: Game.GameState = {
+            playerTurn: 2, 
+            turnStage: "RemoveRing", 
+            ballPool: {"White": 5, "Gray": 7, "Black": 9},
+            player1Balls: {"White": 0, "Gray": 1, "Black": 0}, 
+            player2Balls: {"White": 0, "Gray": 0, "Black": 1},
+            ballSelectedForPlacement: null,
+            winner: 0,
+        }
+
+        Game.setGameState(expected);
+
+        expect(Game.getGameState()).toEqual(expected);
     });
     test('setState', () => {
         setup();
@@ -216,7 +239,7 @@ describe('Game state tests', () => {
         }
     });
 
-    test('canJump', () => {
+    test('canJump specific direction', () => {
         setup();
         Game.setState('White', 2, 4);
         Game.setState('White', 2, 5);
@@ -254,6 +277,46 @@ describe('Game state tests', () => {
         expect(Game.canJump(2, 5, Game.Direction.W)).toBeTruthy();
         expect(Game.canJump(2, 3, Game.Direction.W)).toBeFalsy(); // Space unoccupied
         expect(Game.canJump(2, 2, Game.Direction.W)).toBeFalsy(); // Space removed
+    });
+
+    test('canJump any direction', () => {
+        setup();
+        Game.setState('White', 2, 4);
+        Game.setState('White', 2, 5);
+        Game.setState('White', 2, 6);
+
+        Game.setState('Black', 4, 1);
+        Game.setState('Open', 4, 4);
+        Game.setState('Black', 4, 7);
+
+        Game.setState('Gray', 6, 4);
+        Game.setState('Gray', 6, 5);
+
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\W\W\W\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \B\O\O\O\O\O\B\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\G\G\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        expect(Game.canJump(3, 7)).toBeFalsy()
+        expect(Game.canJump(4, 7)).toBeTruthy();
+        expect(Game.canJump(3, 2)).toBeFalsy()
+        expect(Game.canJump(4, 1)).toBeTruthy();
+        expect(Game.canJump(2, 4)).toBeTruthy()
+        expect(Game.canJump(2, 5)).toBeTruthy();
+        expect(Game.canJump(1, 6)).toBeFalsy()
+        expect(Game.canJump(2, 6)).toBeTruthy();
+        expect(Game.canJump(3, 5)).toBeFalsy()
+        expect(Game.canJump(4, 4)).toBeFalsy();
+        expect(Game.canJump(2, 4)).toBeTruthy()
+        expect(Game.canJump(2, 5)).toBeTruthy();
+        expect(Game.canJump(2, 3)).toBeFalsy()
+        expect(Game.canJump(2, 2)).toBeFalsy()
     });
 
     test('getJumps', () => {
@@ -295,7 +358,7 @@ describe('Game state tests', () => {
         expect(actual).toEqual(expected);
     });
 
-    test('hasJumps', () => {
+    test('jumpsExist', () => {
         setup();
         //  \0\1\2\3\4\5\6\7\8\
         // 0 \ \ \ \ \ \ \ \ \ \
@@ -312,13 +375,13 @@ describe('Game state tests', () => {
             for (let col = 1; col <= Game.BOARD_SIZE; col++) {
                 for (let dir of Game.Directions) {
                     if (Game.canJump(row, col, dir) ) {
-                        expect(Game.hasJumps()).toBeTruthy();
+                        expect(Game.jumpsExist()).toBeTruthy();
                         Game.jump(row, col, dir);
                     }
                 }
             }
         }
-        expect(Game.hasJumps()).toBeFalsy();
+        expect(Game.jumpsExist()).toBeFalsy();
     });
 
 
@@ -659,7 +722,7 @@ describe('Game state tests', () => {
         expect(Game.getState(7, 7)).toEqual(expected);
     });
 
-    test('hasRemovableRings', () => {
+    test('removableRingsExist', () => {
         setup();
         //  \0\1\2\3\4\5\6\7\8\
         // 0 \ \ \ \ \ \ \ \ \ \
@@ -675,12 +738,12 @@ describe('Game state tests', () => {
         for (let row = 1; row <= Game.BOARD_SIZE; row++) {
             for (let col = 1; col <= Game.BOARD_SIZE; col++) {
                 if (Game.canRemove(row, col) ) {
-                    expect(Game.hasRemovableRings()).toBeTruthy();
+                    expect(Game.removableRingsExist()).toBeTruthy();
                     Game.removeRing(row, col);
                 }
             }
         }
-        expect(Game.hasRemovableRings()).toBeFalsy();
+        expect(Game.removableRingsExist()).toBeFalsy();
     });
 
     test('Removed can\'t be changed', () => {
@@ -752,18 +815,112 @@ describe('Game state tests', () => {
         expect(Game.isChangeAllowed(5, 2, 'Removed')).toBeFalsy();
     });
 
-    test('toString', () => {
-        const stages: { [key: Game.TurnStage]: string} = {
-            ['SelectBallForPlacement']: 'select a ball to place',
-            ['SelectPlacement']: 'place the selected ball',
-            ['SelectJump']: 'select a ball to jump',
-            ['RemoveRing']: 'select a ring to remove',
-            ['PlaceFirstJump']: 'select destination for the current jump',
-            ['CompleteJumpOrPlaceNextJump']: 'continue or complete a jump in progress',
-        };
+    test('Select ball from pool', () => {
+        setup();
+        Game.selectBallFromPool("White");
 
-    Game.initBoard();
-        const expected = 
+        const state = Game.getGameState();
+        expect(state.turnStage).toEqual("SelectPlacement");
+        expect(state.ballSelectedForPlacement).toEqual("White");
+    });
+
+    test('Reject select ball from empty pool', () => {
+        setup();
+        Game.setGameState({...Game.getGameState(), ballPool:
+            {['White']: 0, ['Gray']: 0, ['Black']: 0}
+        } as Game.GameState)
+        expect(() => Game.selectBallFromPool("White")).toThrow();
+
+        const state = Game.getGameState();
+        expect(state.turnStage).toEqual("SelectBallForPlacement");
+        expect(state.ballSelectedForPlacement).toEqual(null);
+    });
+
+    test('Select ball from player stash', () => {
+        setup();
+        Game.setGameState({...Game.getGameState(), 
+            ballPool: {['White']: 0, ['Gray']: 0, ['Black']: 0},
+            player1Balls: {['White']: 1, ['Gray']: 0, ['Black']: 0},
+        } as Game.GameState)
+
+        Game.selectBallFromPlayerStash("White");
+
+        const state = Game.getGameState();
+        expect(state.turnStage).toEqual("SelectPlacement");
+        expect(state.ballSelectedForPlacement).toEqual("White");
+    });
+
+    test('Reject select ball from empty player stash', () => {
+        setup();
+        Game.setGameState({...Game.getGameState(), 
+            ballPool: {['White']: 0, ['Gray']: 0, ['Black']: 0},
+            player1Balls: {['White']: 0, ['Gray']: 0, ['Black']: 0},
+        } as Game.GameState)
+        expect(() => Game.selectBallFromPlayerStash("White")).toThrow();
+
+        const state = Game.getGameState();
+        expect(state.turnStage).toEqual("SelectBallForPlacement");
+        expect(state.ballSelectedForPlacement).toEqual(null);
+    });
+
+    test('setNextPlayersTurn', () => {
+        Game.init();
+        Game.setGameState({...Game.getGameState(), turnStage: 'SelectPlacement'});
+        expect(Game.getGameState().playerTurn).toEqual(1);
+        Game.setNextPlayersTurn();
+        expect(Game.getGameState().turnStage).toEqual('SelectBallForPlacement');
+        expect(Game.getGameState().playerTurn).toEqual(2);
+        Game.setNextPlayersTurn();
+        expect(Game.getGameState().playerTurn).toEqual(1);
+    });
+
+    test('Place ball', () => {
+        setup();
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\O\O\O\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \O\O\O\O\O\O\O\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        // No ring
+        expect(() => Game.placeBall(1, 3)).toThrow();
+        // Occupied
+        expect(() => Game.placeBall(1, 4)).toThrow();
+        // No ball selected for placement
+        expect(() => Game.placeBall(2, 3)).toThrow();
+
+        Game.selectBallFromPool('Black');
+        expect(Game.getGameState().turnStage).toEqual('SelectPlacement' as Game.TurnStage)
+        expect(() => Game.placeBall(2, 3)).not.toThrow();
+
+        expect(Game.getState(2, 3)).toEqual('Black');
+        expect(Game.getGameState().turnStage).toEqual('SelectBallForPlacement' as Game.TurnStage)
+        expect(Game.getGameState().ballSelectedForPlacement).toBeNull();
+        expect(Game.getGameState().playerTurn).toEqual(2);
+        expect(Game.getGameState().ballPool['Black']).toEqual(9);
+
+        // No white balls available when supposedly 'White' is selected (invalid state)
+        const state = Game.getGameState();
+        state.playerTurn = 1;
+        state.ballPool['White'] = 0;
+        state.player1Balls['White'] = 0;
+        state.ballSelectedForPlacement = 'White';
+
+        Game.setGameState(state);
+        expect(() => Game.placeBall(2, 4)).toThrow();
+        expect(Game.getGameState().ballPool['White']).toEqual(6);
+        expect(Game.getGameState().ballSelectedForPlacement).toEqual('White');
+    });
+
+    test('toString', () => {
+
+    Game.init();
+    let expected = 
 `\\0\\1\\2\\3\\4\\5\\6\\7\\8\\
 0\\ \\ \\ \\ \\ \\ \\ \\ \\ \\
 1 \\ \\ \\ \\ \\O\\O\\O\\O\\ \\
@@ -775,12 +932,47 @@ describe('Game state tests', () => {
 7       \\ \\O\\O\\O\\O\\ \\ \\ \\ \\
 8        \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
 
-Ball pool: 6 white, 8 gray, 10 black
-Player 1: 0 white, 0 gray, 0 black
-Player 2: 0 white, 0 gray, 0 black
+` + JSON.stringify(Game.getGameState(), null, 2);
 
-Player 1's turn to ${stages['SelectBallForPlacement']}`;
+    expect(Game.toString()).toEqual(expected);
 
-        expect(Game.toString()).toEqual(expected);
+    setup();
+    //  \0\1\2\3\4\5\6\7\8\
+    // 0 \ \ \ \ \ \ \ \ \ \
+    // 1  \ \ \ \ \B\B\B\B\ \
+    // 2   \ \ \ \O\O\O\O\O\ \
+    // 3    \ \ \G\G\G\G\G\G\ \
+    // 4     \ \O\O\O\O\O\O\O\ \
+    // 5      \ \W\W\W\W\W\W\ \ \
+    // 6       \ \O\O\O\O\O\ \ \ \
+    // 7        \ \ \ \ \ \ \ \ \ \
+    // 8         \ \ \ \ \ \ \ \ \ \
+
+    const gameState: Game.GameState = {
+        player1Balls: {"White": 3, "Gray": 1, "Black": 0}, 
+        player2Balls: {"White": 0, "Gray": 0, "Black": 1},
+        playerTurn: 2, 
+        turnStage: "SelectBallForPlacement", 
+        winner: 1,
+        ballSelectedForPlacement: null,
+        ballPool: {"White": 3, "Gray": 7, "Black": 9},
+    };
+    Game.setGameState(gameState);
+
+    expected =
+`\\0\\1\\2\\3\\4\\5\\6\\7\\8\\
+0\\ \\ \\ \\ \\ \\ \\ \\ \\ \\
+1 \\ \\ \\ \\ \\B\\B\\B\\B\\ \\
+2  \\ \\ \\ \\O\\O\\O\\O\\O\\ \\
+3   \\ \\ \\G\\G\\G\\G\\G\\G\\ \\
+4    \\ \\O\\O\\O\\O\\O\\O\\O\\ \\
+5     \\ \\W\\W\\W\\W\\W\\W\\ \\ \\
+6      \\ \\O\\O\\O\\O\\O\\ \\ \\ \\
+7       \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
+8        \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
+
+` + JSON.stringify({...gameState}, null, 2);
+
+    expect(Game.toString()).toEqual(expected);
     });
 });
