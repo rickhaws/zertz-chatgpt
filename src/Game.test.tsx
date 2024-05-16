@@ -176,6 +176,7 @@ describe('Game state tests', () => {
             player1Balls: {"White": 0, "Gray": 0, "Black": 0}, 
             player2Balls: {"White": 0, "Gray": 0, "Black": 0},
             ballSelectedForPlacement: null,
+            jumpOrigin: null,
             winner: 0,
         } as Game.GameState)
     });
@@ -187,6 +188,7 @@ describe('Game state tests', () => {
             player1Balls: {"White": 0, "Gray": 1, "Black": 0}, 
             player2Balls: {"White": 0, "Gray": 0, "Black": 1},
             ballSelectedForPlacement: null,
+            jumpOrigin: null,
             winner: 0,
         }
 
@@ -921,6 +923,47 @@ describe('Game state tests', () => {
         expect(Game.getGameState().ballSelectedForPlacement).toEqual('White');
     });
 
+    test('placeJump', () => {
+        setup();
+        Game.setState('Black', 2, 3);
+        Game.setState('Black', 2, 4);
+        Game.setState('Black', 2, 5);
+        Game.setState('Black', 2, 6);
+        Game.setState('Black', 2, 7);
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \B\B\B\B\B\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \O\O\O\O\O\O\O\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+
+        // No jump in progress
+        expect(() => Game.placeJump(4, 6)).toThrow();
+
+        const state = Game.getGameState();
+
+        state.turnStage = 'PlaceFirstJump';
+        state.jumpOrigin = {row: 2, column: 7};
+        Game.setGameState(state);
+
+        // Invalid destination
+        expect(() => Game.placeJump(4, 6)).toThrow();
+
+        Game.placeJump(4, 7);
+        expect(Game.getGameState().turnStage)
+            .toEqual('CompleteJumpOrPlaceNextJump' as Game.TurnStage)
+        // expect(() => Game.placeJump(2, 7)).toThrow();
+
+        // Game.placeJump(6, 5);
+        // expect(Game.getGameState().turnStage)
+            // .toEqual('CompleteJumpOrPlaceNextJump' as Game.TurnStage)
+    });
+
     test('toString', () => {
 
     Game.init();
@@ -960,6 +1003,7 @@ describe('Game state tests', () => {
         winner: 1,
         ballSelectedForPlacement: null,
         ballPool: {"White": 3, "Gray": 7, "Black": 9},
+        jumpOrigin: null,
     };
     Game.setGameState(gameState);
 

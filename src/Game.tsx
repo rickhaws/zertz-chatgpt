@@ -9,6 +9,7 @@ export type GameState = {
     playerTurn: number;
     turnStage: TurnStage;
     ballSelectedForPlacement: BallColor | null;
+    jumpOrigin: {row: number, column: number} | null;
     winner: number;
 };
 
@@ -31,6 +32,7 @@ const initialGameState: GameState = {
     playerTurn: 1,
     turnStage: 'SelectBallForPlacement' as TurnStage,
     ballSelectedForPlacement: null as BallColor | null,
+    jumpOrigin: null,
     winner: 0,
 }
 
@@ -331,6 +333,23 @@ export const placeBall = (row: number, col: number) => {
     pool[color]--;
     gameState.ballSelectedForPlacement = null;
     setNextPlayersTurn();
+}
+
+export const placeJump = (row: number, col: number) => {
+    if (gameState.turnStage !== 'PlaceFirstJump' &&
+        gameState.turnStage !== 'CompleteJumpOrPlaceNextJump' ||
+        gameState.jumpOrigin === null) {
+        throw `Attempted to place a jump when a jump is not in progress: ${gameState.turnStage}`;
+    }
+
+    const origin = new Coordinate(gameState.jumpOrigin.row, gameState.jumpOrigin.column);
+    const destination = new Coordinate(row, col);
+
+    Directions.forEach((d) => {
+        if (origin.getNeighbor(d).getNeighbor(d) === destination)
+    })
+    throw `Jump: ${row}, ${col} is not a valid destination for ` +
+        `${gameState.jumpOrigin.row}, ${gameState.jumpOrigin.column}`;
 }
 
 export const toString = () => {
