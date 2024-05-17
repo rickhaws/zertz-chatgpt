@@ -961,6 +961,33 @@ describe('Game state tests', () => {
         expect(Game.getGameState().ballSelectedForPlacement).toEqual('White');
     });
 
+    test('selectBallToJump', () => {
+        setup();
+        Game.setState('Black', 2, 3);
+        Game.setState('Black', 2, 4);
+        Game.setState('Black', 2, 5);
+        Game.setState('Black', 2, 6);
+        Game.setState('Black', 2, 7);
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \B\B\B\B\B\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \O\O\O\O\O\O\O\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        const originalState = Game.getGameState();
+        expect(() => Game.selectBallToJumpCallback(5, 2)).toThrow();
+
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'SelectJump',
+        })
+    });
+
     test('placeJump', () => {
         setup();
         Game.setState('Black', 2, 3);

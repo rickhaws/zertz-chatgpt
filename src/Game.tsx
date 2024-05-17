@@ -344,6 +344,10 @@ export const placeBallCallback: CellCallback = (row: number, col: number) => {
     setNextPlayersTurn();
 }
 
+export const selectBallToJumpCallback: CellCallback = (row, column) => {
+    throw 'not implemented';
+}
+
 export const placeJumpCallback: CellCallback = (row: number, col: number) => {
     if (gameState.turnStage !== 'PlaceFirstJump' &&
         gameState.turnStage !== 'CompleteJumpOrPlaceNextJump' ||
