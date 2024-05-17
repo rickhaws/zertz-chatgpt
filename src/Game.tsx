@@ -12,6 +12,8 @@ export type GameState = {
     jumpOrigin: {row: number, column: number} | null;
     winner: number;
 };
+export type CellCallback = (row: number, col: number) => void;
+export type SelectBallCallback = (color: BallColor) => void;
 
 const stages = [
     'SelectBallForPlacement',
@@ -288,9 +290,11 @@ export const jump = (row: number, col: number, direction: Coordinate): BallColor
 export const setNextPlayersTurn = () => {
     gameState.playerTurn = gameState.playerTurn % 2 + 1;  // 1 -> 1 + 1 ; 2 ->  + 1
     gameState.turnStage = 'SelectBallForPlacement';
+    gameState.jumpOrigin = null;
+    gameState.ballSelectedForPlacement = null;
 }
 
-export const selectBallFromPool = (color: BallColor) => {
+export const selectBallFromPoolCallback: SelectBallCallback = (color: BallColor) => {
     try {
         selectBallFromCollection(gameState.ballPool, color);
     } catch (e) {
@@ -298,7 +302,7 @@ export const selectBallFromPool = (color: BallColor) => {
     }
 }
 
-export const selectBallFromPlayerStash = (color: BallColor) => {
+export const selectBallFromPlayerStashCallback: SelectBallCallback = (color: BallColor) => {
     const stash = gameState.playerTurn === 1 ? gameState.player1Balls : gameState.player2Balls;
 
     try {
@@ -316,7 +320,7 @@ export const selectBallFromCollection = (collection: BallCollection, color: Ball
     gameState.ballSelectedForPlacement = color;
 }
 
-export const placeBall = (row: number, col: number) => {
+export const placeBallCallback: CellCallback = (row: number, col: number) => {
     if (getState(row, col) !== 'Open') {
         throw `Attempted to place ball at ${row}, ${col} with non-open state: ${getState(row, col)}`;
     }
@@ -332,16 +336,15 @@ export const placeBall = (row: number, col: number) => {
 
     if (pool[color] <= 0) {
         throw `Attempted to place a ${color} ball for Player ${gameState.playerTurn} ` +
-            `whose ${color} ball count is ${pool[color]}`;
+            `from a pool whose ${color} ball count is ${pool[color]}`;
     }
 
     setState(color, row, col);
     pool[color]--;
-    gameState.ballSelectedForPlacement = null;
     setNextPlayersTurn();
 }
 
-export const placeJump = (row: number, col: number) => {
+export const placeJumpCallback: CellCallback = (row: number, col: number) => {
     if (gameState.turnStage !== 'PlaceFirstJump' &&
         gameState.turnStage !== 'CompleteJumpOrPlaceNextJump' ||
         gameState.jumpOrigin === null) {
@@ -371,6 +374,10 @@ export const placeJump = (row: number, col: number) => {
 
     throw `Jump: ${row}, ${col} is not a valid destination for ` +
         `${gameState.jumpOrigin.row}, ${gameState.jumpOrigin.column}`;
+}
+
+export const endJumpCallback: CellCallback = (row: number, column: number) => {
+    setNextPlayersTurn();
 }
 
 export const toString = () => {
