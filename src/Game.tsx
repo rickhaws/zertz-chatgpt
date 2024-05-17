@@ -42,10 +42,21 @@ export const BOARD_SIZE = 7;
 
 const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
 
-export const getGameState = () => ({...gameState});
+export const getGameState = (): GameState => ({
+    ...gameState,
+    ballPool: {...gameState.ballPool},
+    player1Balls: {...gameState.player1Balls},
+    player2Balls: {...gameState.player2Balls},
+});
 
-export const setGameState = (state: GameState) => {
-    gameState = {...state};
+export const setGameState = (newState: GameState) => {
+    gameState = {
+        ...newState,
+        ballPool: {...newState.ballPool},
+        player1Balls: {...newState.player1Balls},
+        player2Balls: {...newState.player2Balls},
+    
+    };
 }
 
 export const getBoardState = () => board.map(row => row.slice());
@@ -77,11 +88,6 @@ class Coordinate  {
     getNeighbors() {
         return Coordinate.directions.map(d => this.getNeighbor(d));
     };
-
-    // get NE() {
-    //     return this.getNeighbor(Coordinate.NE))
-    // }
-
 }
 
 const coord = (row: number, col: number) => new Coordinate(row, col);
@@ -264,7 +270,7 @@ export const removableRingsExist = () => {
     return false;
 }
 
-export const jump = (row: number, col: number, direction: Coordinate) => {
+export const jump = (row: number, col: number, direction: Coordinate): BallColor => {
     if (!canJump(row, col, direction)) {
         return '';
     }
@@ -272,7 +278,7 @@ export const jump = (row: number, col: number, direction: Coordinate) => {
     const neighbor = origin.getNeighbor(direction);
     const destination = neighbor.getNeighbor(direction);
     const movedBall = getState(row, col);
-    const removedBall = getState(neighbor.row, neighbor.column);
+    const removedBall: BallColor = getState(neighbor.row, neighbor.column);
     setState('Open', row, col);
     setState('Open', neighbor.row, neighbor.column);
     setState(movedBall, destination.row, destination.column);
@@ -344,10 +350,25 @@ export const placeJump = (row: number, col: number) => {
 
     const origin = new Coordinate(gameState.jumpOrigin.row, gameState.jumpOrigin.column);
     const destination = new Coordinate(row, col);
+    const rowDirection = (destination.row - origin.row) / 2;
+    const columnDirection = (destination.column - origin.column) / 2;
+    const direction = new Coordinate(rowDirection, columnDirection);
+    const neighbor = origin.getNeighbor(direction)
+    const jumpedBallColor = getState(neighbor.row, neighbor.column);
+    const playerPool = gameState.playerTurn === 1 ? 
+        gameState.player1Balls :
+        gameState.player2Balls;
 
-    Directions.forEach((d) => {
-        if (origin.getNeighbor(d).getNeighbor(d) === destination)
-    })
+    if(Number.isInteger(rowDirection) &&
+        Number.isInteger(columnDirection) &&
+        canJump(origin.row, origin.column, direction)) {
+        jump(origin.row, origin.column, direction);
+        gameState.turnStage = 'CompleteJumpOrPlaceNextJump';
+        gameState.jumpOrigin = destination;
+        playerPool[jumpedBallColor]++;
+        return;
+    }
+
     throw `Jump: ${row}, ${col} is not a valid destination for ` +
         `${gameState.jumpOrigin.row}, ${gameState.jumpOrigin.column}`;
 }
