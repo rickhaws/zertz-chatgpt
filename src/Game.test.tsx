@@ -981,11 +981,32 @@ describe('Game state tests', () => {
 
         const originalState = Game.getGameState();
         expect(() => Game.selectBallToJumpCallback(5, 2)).toThrow();
+        expect(Game.getGameState()).toStrictEqual(originalState);
 
         Game.setGameState({
             ...originalState,
             turnStage: 'SelectJump',
         })
+        const preJumpState = Game.getGameState();
+
+        expect(() => Game.selectBallToJumpCallback(5, 2)).toThrow();
+        expect(() => Game.selectBallToJumpCallback(4, 2)).toThrow();
+        expect(() => Game.selectBallToJumpCallback(3, 1)).toThrow();
+        expect(() => Game.selectBallToJumpCallback(1, 4)).toThrow();
+        expect(Game.getGameState()).toStrictEqual(preJumpState);
+
+        expect(() => Game.selectBallToJumpCallback(2, 2)).not.toThrow();
+        const resultantState = Game.getGameState();
+        expect(resultantState.jumpOrigin?.row).toEqual(2);
+        expect(resultantState.jumpOrigin?.column).toEqual(2);
+        expect(resultantState.turnStage).toEqual('PlaceFirstJump');
+        expect(resultantState.ballPool).toStrictEqual(preJumpState.ballPool);
+        expect(resultantState.player1Balls).toStrictEqual(preJumpState.player1Balls);
+        expect(resultantState.player2Balls).toStrictEqual(preJumpState.player2Balls);
+        expect(resultantState.playerTurn).toStrictEqual(preJumpState.playerTurn);
+        expect(resultantState.ballSelectedForPlacement)
+            .toStrictEqual(preJumpState.ballSelectedForPlacement);
+        expect(resultantState.winner).toStrictEqual(preJumpState.winner);
     });
 
     test('placeJump', () => {
