@@ -200,7 +200,7 @@ export const setState = (newState: SpaceState, rowOrCoordinate: number | Coordin
     }
 };
 
-export const removeRing = (row: number, col: number) => setState("Removed", row, col);
+export const removeRing = (row: number, col: number) => setState('Removed', row, col);
 
 export const canJump = (row: number, col: number, direction?: Coordinate): boolean => {
     const cell = coord(row, col);
@@ -316,7 +316,7 @@ export const selectBallFromCollection = (collection: BallCollection, color: Ball
     if (collection[color] <= 0) {
         throw `No ${color} balls available for selection`;
     }
-    gameState.turnStage = "SelectPlacement";
+    gameState.turnStage = 'SelectPlacement';
     gameState.ballSelectedForPlacement = color;
 }
 
@@ -344,8 +344,13 @@ export const placeBallCallback: CellCallback = (row: number, col: number) => {
     setNextPlayersTurn();
 }
 
-export const selectBallToJumpCallback: CellCallback = (row, column) => {
-    throw 'not implemented';
+export const selectBallToJumpCallback: CellCallback = (row, col) => {
+    if (! canJump(row, col)) {
+        throw `Cell ${row}, ${col} is not a valid jump origin`;
+    }
+    gameState.jumpOrigin = coord(row, col);
+    gameState.turnStage = 'PlaceFirstJump';
+    return;
 }
 
 export const placeJumpCallback: CellCallback = (row: number, col: number) => {
@@ -380,7 +385,12 @@ export const placeJumpCallback: CellCallback = (row: number, col: number) => {
         `${gameState.jumpOrigin.row}, ${gameState.jumpOrigin.column}`;
 }
 
-export const endJumpCallback: CellCallback = (row: number, column: number) => {
+export const completeJumpCallback: CellCallback = (row: number, col: number) => {
+    if (row !== gameState.jumpOrigin?.row ||
+        col !== gameState.jumpOrigin?.column) {
+        placeJumpCallback(row, col);
+    }
+
     setNextPlayersTurn();
 }
 
@@ -401,7 +411,7 @@ export const toString = () => {
         }
     }
 
-    output += "\n\n" + JSON.stringify(gameState, null, 2);
+    output += '\n\n' + JSON.stringify(gameState, null, 2);
 
     return output;
 };
