@@ -1,4 +1,5 @@
 import { statSync } from 'fs';
+import { getSourceMapRange } from 'typescript';
 import * as Game from './Game';
 
 // Representation of Zertz board.
@@ -1142,6 +1143,55 @@ describe('Game state tests', () => {
             },
             playerTurn: 2,
         })
+    });
+
+    test('removeRingCallback', () => {
+        setup();
+        //  \0\1\2\3\4\5\6\7\8\
+        // 0 \ \ \ \ \ \ \ \ \ \
+        // 1  \ \ \ \ \B\B\B\B\ \
+        // 2   \ \ \ \O\O\O\O\O\ \
+        // 3    \ \ \G\G\G\G\G\G\ \
+        // 4     \ \O\O\O\O\O\O\O\ \
+        // 5      \ \W\W\W\W\W\W\ \ \
+        // 6       \ \O\O\O\O\O\ \ \ \
+        // 7        \ \ \ \ \ \ \ \ \ \
+        // 8         \ \ \ \ \ \ \ \ \ \
+
+        const originalState = Game.getGameState();
+
+        // Test wrong game state
+        expect(() => Game.removeRingCallback(1,4)).toThrow();
+
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'RemoveRing',
+        });
+
+        // Test invalid location
+        expect(() => Game.removeRingCallback(1,1)).toThrow(); // already removed
+        expect(() => Game.removeRingCallback(1,5)).toThrow(); // occupied
+        expect(() => Game.removeRingCallback(3,3)).toThrow(); // enclosed
+
+        // Test remove ring
+        expect(() => Game.removeRingCallback(2, 3)).not.toThrow();
+        expect(Game.getGameState()).toStrictEqual({
+            ...originalState,
+            playerTurn: 2,
+        });
+        expect(Game.getState(2, 3)).toBe('Removed');
+
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'RemoveRing',
+        });
+
+        expect(() => Game.removeRingCallback(4, 7)).not.toThrow();
+        expect(Game.getGameState()).toStrictEqual({
+            ...originalState,
+            playerTurn: 2,
+        });
+        expect(Game.getState(4, 7)).toBe('Removed');
     });
 
     test('toString', () => {

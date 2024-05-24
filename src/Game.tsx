@@ -394,6 +394,15 @@ export const completeJumpCallback: CellCallback = (row: number, col: number) => 
     setNextPlayersTurn();
 }
 
+export const removeRingCallback: CellCallback = (row: number, col: number) => {
+    if (! canRemove(row, col)) {
+        throw `Cannot remove ring at ${row}, ${col}`;
+    }
+
+    removeRing(row, col);
+    setNextPlayersTurn();
+}
+
 export const toString = () => {
     const symbols: { [key: SpaceState]: string } = {
         'Removed': ' ',
