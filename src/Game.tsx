@@ -1,3 +1,5 @@
+import { setgid } from "process";
+
 const ballColors = ['White', 'Gray', 'Black'];
 export type BallColor = typeof ballColors[number];
 const isBallColor = (maybeColor: SpaceState): maybeColor is BallColor => ballColors.includes(maybeColor);
@@ -26,42 +28,6 @@ const stages = [
 export type TurnStage = typeof stages[number];
 const isStage = (maybeStage: string): maybeStage is TurnStage => stages.includes(maybeStage);
 export type BallCollection = { [key: BallColor]: number };
-
-const initialGameState: GameState = {
-    ballPool: { White: 6, Gray: 8, Black: 10 }, // **TODO**: Check these numbers
-    player1Balls: { White: 0, Gray: 0, Black: 0 } as BallCollection,
-    player2Balls: { White: 0, Gray: 0, Black: 0 } as BallCollection,
-    playerTurn: 1,
-    turnStage: 'SelectBallForPlacement' as TurnStage,
-    ballSelectedForPlacement: null as BallColor | null,
-    jumpOrigin: null,
-    winner: 0,
-}
-
-let gameState = initialGameState;
-
-export const BOARD_SIZE = 7;
-
-const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
-
-export const getGameState = (): GameState => ({
-    ...gameState,
-    ballPool: {...gameState.ballPool},
-    player1Balls: {...gameState.player1Balls},
-    player2Balls: {...gameState.player2Balls},
-});
-
-export const setGameState = (newState: GameState) => {
-    gameState = {
-        ...newState,
-        ballPool: {...newState.ballPool},
-        player1Balls: {...newState.player1Balls},
-        player2Balls: {...newState.player2Balls},
-    
-    };
-}
-
-export const getBoardState = () => board.map(row => row.slice());
 
 /**
  * Convenience class to simplify working with neighbors
@@ -119,6 +85,51 @@ export const Directions = [...Coordinate.directions];
     // 6       \ \O\O\O\O\O\ \ \ \
     // 7        \ \O\O\O\O\ \ \ \ \
     // 8         \ \ \ \ \ \ \ \ \ \
+
+export interface GameType {
+    BOARD_SIZE: number;
+    getGameState: () => GameState;
+    setGameState: (state: GameState) => void;
+    getBoardState: () => SpaceState[][];
+    init: () => void;
+    getState: (row: number, col: number) => SpaceState;
+}
+
+const initialGameState: GameState = {
+    ballPool: { White: 6, Gray: 8, Black: 10 }, // **TODO**: Check these numbers
+    player1Balls: { White: 0, Gray: 0, Black: 0 } as BallCollection,
+    player2Balls: { White: 0, Gray: 0, Black: 0 } as BallCollection,
+    playerTurn: 1,
+    turnStage: 'SelectBallForPlacement' as TurnStage,
+    ballSelectedForPlacement: null as BallColor | null,
+    jumpOrigin: null,
+    winner: 0,
+}
+
+let gameState = initialGameState;
+
+export const BOARD_SIZE = 7;
+
+const board: SpaceState[][] = Array(BOARD_SIZE + 2).fill(0).map(() => Array(BOARD_SIZE + 2).fill('Open'));
+
+export const getGameState = (): GameState => ({
+    ...gameState,
+    ballPool: {...gameState.ballPool},
+    player1Balls: {...gameState.player1Balls},
+    player2Balls: {...gameState.player2Balls},
+});
+
+export const setGameState = (newState: GameState) => {
+    gameState = {
+        ...newState,
+        ballPool: {...newState.ballPool},
+        player1Balls: {...newState.player1Balls},
+        player2Balls: {...newState.player2Balls},
+    
+    };
+}
+
+export const getBoardState = (): SpaceState[][] => board.map(row => row.slice());
 
 export const init = () => {
     for (let i = 0; i < BOARD_SIZE + 2; i++) {

@@ -2,12 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import Ring from './Ring';
 import Ball from './Ball';
-import * as Game from './Game';
 
-interface BoardProps { }
+import { GameType, SpaceState } from './Game';
 
-const Board: React.FC<BoardProps> = () => {
+interface BoardProps { 
+    game: GameType;
+}
+
+const Board: React.FC<BoardProps> = (props: BoardProps) => {
     // ------------------------ BOARD DEFINITION CONSTANTS --------------------
+    const Game = props.game;
     const ballCounts = [6, 8, 10];
     const ballColors = ['ivory', 'gray', 'gunmetalgray']
     const ringRadius = 50;
@@ -19,11 +23,7 @@ const Board: React.FC<BoardProps> = () => {
     const [indexC, setC] = useState(2);
     const [seconds, setSeconds] = useState(0);
 
-    const handleClick = (row: number, col: number) => {
-        console.log(`Space (${row}, ${col}) was clicked`);
-    };
-
-    const getBallColor = (state: Game.SpaceState) => {
+    const getBallColor = (state: SpaceState) => {
         switch(state) {
             case "White":
                 return ballColors[0];
@@ -82,6 +82,16 @@ const Board: React.FC<BoardProps> = () => {
         setBalls(ballCollector);
     };
 
+    const handleClick = (row: number, col: number) => {
+        console.log(`Space (${row}, ${col}) was clicked`);
+        const cellState = Game.getState(row, col);
+        const gameState = Game.getGameState();
+
+        switch (gameState.turnStage) {
+
+        }
+    };
+
 
     // Board: knows which SVG elements correspond to each board position and spare ball position
     //        collection of balls
@@ -93,20 +103,20 @@ const Board: React.FC<BoardProps> = () => {
     useEffect(() => {
         Game.init();
         drawBoard();
-        setInterval(() => setSeconds(i => i + 1), 1000);
+        // setInterval(() => setSeconds(i => i + 1), 1000);
     }, []);
     // temp - change colors
-    useEffect(() => {
-        setA(i => i + 1);
-        setB(i => i + 1);
-        setC(i => i + 1);
-        const states: Game.SpaceState[] = ['Black', 'White', 'Gray', 'Open', 'Removed'];
-        const state = states[seconds % states.length];
-        const row = Math.ceil(Math.random() * Game.BOARD_SIZE);
-        const col = Math.ceil(Math.random() * Game.BOARD_SIZE);
-        Game.setState(state, row, col);
-        drawBoard();
-    }, [seconds]);
+    // useEffect(() => {
+    //     setA(i => i + 1);
+    //     setB(i => i + 1);
+    //     setC(i => i + 1);
+    //     const states: Game.SpaceState[] = ['Black', 'White', 'Gray', 'Open', 'Removed'];
+    //     const state = states[seconds % states.length];
+    //     const row = Math.ceil(Math.random() * Game.BOARD_SIZE);
+    //     const col = Math.ceil(Math.random() * Game.BOARD_SIZE);
+    //     Game.setState(state, row, col);
+    //     drawBoard();
+    // }, [seconds]);
 
     const handleMove = (/* handle user moves */) => {
         // Update game state
