@@ -18,8 +18,7 @@ export type CellCallback = (row: number, col: number) => void;
 export type SelectBallCallback = (color: BallColor) => void;
 
 const stages = [
-    'SelectBallForPlacement',
-    'SelectJump',
+    'SelectJumpOrSelectBallForPlacement',
     'SelectPlacement',
     'RemoveRing',
     'PlaceFirstJump',
@@ -93,6 +92,7 @@ export interface GameType {
     getBoardState: () => SpaceState[][];
     init: () => void;
     getState: (row: number, col: number) => SpaceState;
+    isOccupied: (row: number, col: number) => boolean;
 }
 
 const initialGameState: GameState = {
@@ -366,12 +366,20 @@ export const selectBallToJumpCallback: CellCallback = (row, col) => {
 
 export const placeJumpCallback: CellCallback = (row: number, col: number) => {
     if (gameState.turnStage !== 'PlaceFirstJump' &&
-        gameState.turnStage !== 'CompleteJumpOrPlaceNextJump' ||
         gameState.jumpOrigin === null) {
         throw `Attempted to place a jump when a jump is not in progress: ${gameState.turnStage}`;
     }
 
-    const origin = new Coordinate(gameState.jumpOrigin.row, gameState.jumpOrigin.column);
+    // A second click on the destination will end the player's turn
+    if (gameState.turnStage === 'CompleteJumpOrPlaceNextJump' &&
+        row === gameState.jumpOrigin?.row &&
+        col === gameState.jumpOrigin?.column) {
+        setNextPlayersTurn();
+        return;
+    }
+
+    // Place the jump
+    const origin = new Coordinate(gameState.jumpOrigin!.row, gameState.jumpOrigin!.column);
     const destination = new Coordinate(row, col);
     const rowDirection = (destination.row - origin.row) / 2;
     const columnDirection = (destination.column - origin.column) / 2;
@@ -393,16 +401,7 @@ export const placeJumpCallback: CellCallback = (row: number, col: number) => {
     }
 
     throw `Jump: ${row}, ${col} is not a valid destination for ` +
-        `${gameState.jumpOrigin.row}, ${gameState.jumpOrigin.column}`;
-}
-
-export const completeJumpCallback: CellCallback = (row: number, col: number) => {
-    if (row !== gameState.jumpOrigin?.row ||
-        col !== gameState.jumpOrigin?.column) {
-        placeJumpCallback(row, col);
-    }
-
-    setNextPlayersTurn();
+        `${origin.row}, ${origin.column}`;
 }
 
 export const removeRingCallback: CellCallback = (row: number, col: number) => {
@@ -413,6 +412,40 @@ export const removeRingCallback: CellCallback = (row: number, col: number) => {
     removeRing(row, col);
     setNextPlayersTurn();
 }
+
+export const handleCellClick: CellCallback = (row: number, col: number) => {
+    console.log(`Space (${row}, ${col}) was clicked`);
+
+    switch (gameState.turnStage) {
+        case 'SelectJumpOrSelectBallForPlacement':
+            selectBallToJumpCallback(row, col);
+            break;
+        case 'SelectPlacement':
+            placeBallCallback(row, col);
+            break;
+        case 'RemoveRing':
+            removeRingCallback(row, col);
+            break;
+        case 'PlaceFirstJump':
+        case 'CompleteJumpOrPlaceNextJump':
+            placeJumpCallback(row, col);
+            break;
+        default:
+            break;
+    }
+};
+
+// export const handlePlayerStashClick: SelectBallCallback = (color: BallColor) => {
+//     console.log(`Ball color ${color} was selected from ${gameState.playerTurn}'s stash`);
+
+//     switch (gameState.turnStage) {
+//         case 'SelectBallForPlacement':
+//             selectBallFromPlayerStashCallback()
+//             break;
+//         default:
+//             break;
+//     }
+// };
 
 export const toString = () => {
     const symbols: { [key: SpaceState]: string } = {

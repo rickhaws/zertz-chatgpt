@@ -849,7 +849,7 @@ describe('Game state tests', () => {
         expect(Game.isChangeAllowed(5, 2, 'Removed')).toBeFalsy();
     });
 
-    test('Select ball from pool', () => {
+    test('Select ball from pool callback', () => {
         setup();
         Game.selectBallFromPoolCallback('White');
 
@@ -858,7 +858,7 @@ describe('Game state tests', () => {
         expect(state.ballSelectedForPlacement).toEqual('White');
     });
 
-    test('Reject select ball from empty pool', () => {
+    test('Reject select ball from pool  callback with empty pool', () => {
         setup();
         Game.setGameState({...Game.getGameState(), ballPool:
             {['White']: 0, ['Gray']: 0, ['Black']: 0}
@@ -870,7 +870,7 @@ describe('Game state tests', () => {
         expect(state.ballSelectedForPlacement).toEqual(null);
     });
 
-    test('Select ball from player stash', () => {
+    test('Select ball from player stash callback', () => {
         setup();
         Game.setGameState({...Game.getGameState(), 
             ballPool: {['White']: 0, ['Gray']: 0, ['Black']: 0},
@@ -884,7 +884,7 @@ describe('Game state tests', () => {
         expect(state.ballSelectedForPlacement).toEqual('White');
     });
 
-    test('Reject select ball from empty player stash', () => {
+    test('Reject select ball from player stash callback, empty', () => {
         setup();
         Game.setGameState({...Game.getGameState(), 
             ballPool: {['White']: 0, ['Gray']: 0, ['Black']: 0},
@@ -915,7 +915,7 @@ describe('Game state tests', () => {
         expect(Game.getGameState().playerTurn).toEqual(1);
     });
 
-    test('Place ball', () => {
+    test('Place ball callback', () => {
         setup();
         //  \0\1\2\3\4\5\6\7\8\
         // 0 \ \ \ \ \ \ \ \ \ \
@@ -962,7 +962,7 @@ describe('Game state tests', () => {
         expect(Game.getGameState().ballSelectedForPlacement).toEqual('White');
     });
 
-    test('selectBallToJump', () => {
+    test('selectBallToJumpCallback', () => {
         setup();
         Game.setState('Black', 2, 3);
         Game.setState('Black', 2, 4);
@@ -986,7 +986,7 @@ describe('Game state tests', () => {
 
         Game.setGameState({
             ...originalState,
-            turnStage: 'SelectJump',
+            turnStage: 'SelectJumpOrSelectBallForPlacement',
         })
         const preJumpState = Game.getGameState();
 
@@ -1012,7 +1012,7 @@ describe('Game state tests', () => {
         expect(() => Game.selectBallToJumpCallback(2, 4)).not.toThrow();
     });
 
-    test('placeJump', () => {
+    test('placeJumpCallback', () => {
         setup();
         Game.setState('Black', 2, 3);
         Game.setState('Black', 2, 4);
@@ -1085,7 +1085,7 @@ describe('Game state tests', () => {
             originalState.player2Balls['White'] + 1);
     });
 
-    test('completeJump', () => {
+    test('completeJumpCallback', () => {
         setup();
         Game.setState('Black', 2, 3);
         Game.setState('Black', 2, 4);
@@ -1194,7 +1194,112 @@ describe('Game state tests', () => {
         expect(Game.getState(4, 7)).toBe('Removed');
     });
 
-    test('toString', () => {
+    test('handleCellClickCallback', () => {
+        jest.spyOn(Game, "selectBallFromPoolCallback");
+        jest.spyOn(Game, "selectBallFromPlayerStashCallback");
+        jest.spyOn(Game, "placeBallCallback");
+        jest.spyOn(Game, "selectBallToJumpCallback");
+        jest.spyOn(Game, "placeJumpCallback");
+        jest.spyOn(Game, "completeJumpCallback");
+        jest.spyOn(Game, "removeRingCallback");
+
+
+        setup();
+        const originalState = Game.getGameState();
+
+        jest.resetAllMocks();
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'SelectJumpOrSelectBallForPlacement',
+        });
+        Game.handleCellClick(3, 3);
+        expect(Game.selectBallFromPoolCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallFromPlayerStashCallback).not.toHaveBeenCalled();
+        expect(Game.placeBallCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallToJumpCallback).toHaveBeenCalledWith(3, 3);
+        expect(Game.placeJumpCallback).not.toHaveBeenCalled();
+        expect(Game.removeRingCallback).not.toHaveBeenCalled();
+
+        jest.resetAllMocks();
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'SelectPlacement',
+        });
+        Game.handleCellClick(3, 3);
+        expect(Game.selectBallFromPoolCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallFromPlayerStashCallback).not.toHaveBeenCalled();
+        expect(Game.placeBallCallback).toHaveBeenCalledWith(3, 3);
+        expect(Game.selectBallToJumpCallback).not.toHaveBeenCalled();
+        expect(Game.placeJumpCallback).not.toHaveBeenCalled();
+        expect(Game.removeRingCallback).not.toHaveBeenCalled();
+
+        jest.resetAllMocks();
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'SelectPlacement',
+        });
+        Game.handleCellClick(3, 3);
+        expect(Game.selectBallFromPoolCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallFromPlayerStashCallback).not.toHaveBeenCalled();
+        expect(Game.placeBallCallback).toHaveBeenCalledWith(3, 3);
+        expect(Game.selectBallToJumpCallback).not.toHaveBeenCalled();
+        expect(Game.placeJumpCallback).not.toHaveBeenCalled();
+        expect(Game.removeRingCallback).not.toHaveBeenCalled();
+
+        jest.resetAllMocks();
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'RemoveRing',
+        });
+        Game.handleCellClick(3, 3);
+        expect(Game.selectBallFromPoolCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallFromPlayerStashCallback).not.toHaveBeenCalled();
+        expect(Game.placeBallCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallToJumpCallback).not.toHaveBeenCalled();
+        expect(Game.placeJumpCallback).not.toHaveBeenCalled();
+        expect(Game.removeRingCallback).toHaveBeenCalledWith(3, 3);
+
+        jest.resetAllMocks();
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'PlaceFirstJump',
+        });
+        Game.handleCellClick(3, 3);
+        expect(Game.selectBallFromPoolCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallFromPlayerStashCallback).not.toHaveBeenCalled();
+        expect(Game.placeBallCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallToJumpCallback).not.toHaveBeenCalled();
+        expect(Game.placeJumpCallback).toHaveBeenCalledWith(3, 3);
+        expect(Game.removeRingCallback).not.toHaveBeenCalled();
+
+        jest.resetAllMocks();
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'CompleteJumpOrPlaceNextJump',
+        });
+        Game.handleCellClick(3, 3);
+        expect(Game.selectBallFromPoolCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallFromPlayerStashCallback).not.toHaveBeenCalled();
+        expect(Game.placeBallCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallToJumpCallback).not.toHaveBeenCalled();
+        expect(Game.placeJumpCallback).toHaveBeenCalledWith(3, 3);
+        expect(Game.removeRingCallback).not.toHaveBeenCalled();
+
+        jest.resetAllMocks();
+        Game.setGameState({
+            ...originalState,
+            turnStage: 'CompleteJumpOrPlaceNextJump',
+        });
+        Game.handleCellClick(3, 3);
+        expect(Game.selectBallFromPoolCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallFromPlayerStashCallback).not.toHaveBeenCalled();
+        expect(Game.placeBallCallback).not.toHaveBeenCalled();
+        expect(Game.selectBallToJumpCallback).not.toHaveBeenCalled();
+        expect(Game.placeJumpCallback).not.toHaveBeenCalled();
+        expect(Game.removeRingCallback).not.toHaveBeenCalled();
+    });
+
+test('toString', () => {
 
     Game.init();
     let expected = 

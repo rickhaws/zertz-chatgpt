@@ -32,4 +32,5 @@ const Ring: React.FC<RingProps> = (props: RingProps) => {
 />)
 };
 
+
 export default Ring;

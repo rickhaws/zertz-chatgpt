@@ -60,7 +60,8 @@ const Board: React.FC<BoardProps> = (props: BoardProps) => {
                         row={row}
                         col={col}
                         isVisible={Game.getState(row, col) !== 'Removed'}
-                        onClick={handleClick}
+                        onClick={Game.handleCellClick()}
+                        onDoubleClick={Game.handleCellDoubleClick()}
                     />
                 ballCollector[i] = 
                     <Ball
@@ -73,7 +74,8 @@ const Board: React.FC<BoardProps> = (props: BoardProps) => {
                         col={col}
                         color={getBallColor(Game.getState(row, col))}
                         isVisible={Game.isOccupied(row, col)}
-                        onClick={handleClick}
+                        onClick={Game.handleCellClick()}
+                        onDoubleClick={Game.handleCellDoubleClick()}
                     />
                 i++;
             }
@@ -81,17 +83,6 @@ const Board: React.FC<BoardProps> = (props: BoardProps) => {
         setRings(ringCollector);
         setBalls(ballCollector);
     };
-
-    const handleClick = (row: number, col: number) => {
-        console.log(`Space (${row}, ${col}) was clicked`);
-        const cellState = Game.getState(row, col);
-        const gameState = Game.getGameState();
-
-        switch (gameState.turnStage) {
-
-        }
-    };
-
 
     // Board: knows which SVG elements correspond to each board position and spare ball position
     //        collection of balls
